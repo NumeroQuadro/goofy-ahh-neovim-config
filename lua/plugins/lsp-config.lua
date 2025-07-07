@@ -51,7 +51,7 @@ return {
 
                 buf_set_keymap('n', 'gd', vim.lsp.buf.definition, "Go to definition")
                 buf_set_keymap('n', 'K', vim.lsp.buf.hover, "Hover documentation")
-                buf_set_keymap('i', '<C-h>', vim.lsp.buf.signature_help, "Signature help")
+                buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, "Signature help")
                 buf_set_keymap('n', '<leader>rn', vim.lsp.buf.rename, "Rename symbol")
                 buf_set_keymap('n', '<leader>ca', vim.lsp.buf.code_action, "Code action")
                 buf_set_keymap('n', 'gr', vim.lsp.buf.references, "Go to references")
