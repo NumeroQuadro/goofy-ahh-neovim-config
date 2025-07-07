@@ -57,6 +57,7 @@ return {
                 buf_set_keymap('n', 'gr', vim.lsp.buf.references, "Go to references")
                 buf_set_keymap('n', '[d', vim.diagnostic.goto_prev, "Previous diagnostic")
                 buf_set_keymap('n', ']d', vim.diagnostic.goto_next, "Next diagnostic")
+                buf_set_keymap('n', 'gi', vim.lsp.buf.implementation, "Go to implementation")
             end
 
             lspconfig.lua_ls.setup({
