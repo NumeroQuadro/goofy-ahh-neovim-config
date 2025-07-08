@@ -41,12 +41,13 @@ return {
 
             local lspconfig = require("lspconfig")
 
+            local buf_set_keymap = function(mode, lhs, rhs, desc)
+                vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+            end
+
             local on_attach = function(client, bufnr)
                 if client.supports_method("textDocument/inlayHint") then
                     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-                end
-                local buf_set_keymap = function(mode, lhs, rhs, desc)
-                    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
                 end
 
                 buf_set_keymap('n', 'gd', vim.lsp.buf.definition, "Go to definition")
@@ -57,7 +58,7 @@ return {
                 buf_set_keymap('n', 'gr', vim.lsp.buf.references, "Go to references")
                 buf_set_keymap('n', '[d', vim.diagnostic.goto_prev, "Previous diagnostic")
                 buf_set_keymap('n', ']d', vim.diagnostic.goto_next, "Next diagnostic")
-                buf_set_keymap('n', 'gi', vim.lsp.buf.implementation, "Go to implementation")
+                vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', { noremap=true, silent=true })
             end
 
             lspconfig.lua_ls.setup({
