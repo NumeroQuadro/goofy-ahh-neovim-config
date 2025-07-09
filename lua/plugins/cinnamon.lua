@@ -5,7 +5,9 @@ return {
     require("cinnamon").setup({
       -- KEYMAPS
       -- To use the default keymaps, put this in your config
-      default_keymaps = true,
+      keymaps = {
+        basic = true,
+      },
 
       -- To use custom keymaps, define them here
       -- keymaps = {
