@@ -120,6 +120,12 @@ return {
             vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, {})         
 
             vim.diagnostic.config({
+              virtual_text = {
+                format = function(diagnostic)
+                  -- Prepend the source name to the diagnostic message
+                  return string.format("%s: %s", diagnostic.source, diagnostic.message)
+                end,
+              },
               float = {
                 source = "always",
                 wrap = true,
