@@ -4,6 +4,15 @@ return {
         require('lualine').setup({
             options = {
                 theme = 'dracula'
+            },
+            sections = {
+                lualine_c = {
+                    'filename',
+                    {
+                        'modified',
+                        symbols = {modified = '+', readonly = '-'},
+                    }
+                }
             }
         })
     end
