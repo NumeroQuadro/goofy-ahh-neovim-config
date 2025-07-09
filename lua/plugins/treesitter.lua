@@ -1,9 +1,11 @@
 return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
+    dependencies = {
+        "nvim-treesitter/nvim-treesitter-context",
+    },
     config = function()
-        local config = require("nvim-treesitter.configs")
-        config.setup({
+        require("nvim-treesitter.configs").setup({
             ensure_installed = {
                   "c",
                   "lua",
@@ -18,8 +20,11 @@ return {
                   "proto",   -- for Protocol Buffers (proto3)
                   "sql",     -- for SQL
             },
-        highlight = { enable = true },
-        indent = { enable = true },
-    })
+            highlight = { enable = true },
+            indent = { enable = true },
+        })
+        require("treesitter-context").setup({
+            enable = true, -- Enable this plugin
+        })
     end
 }
