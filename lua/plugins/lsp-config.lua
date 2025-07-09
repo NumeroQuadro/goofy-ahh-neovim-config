@@ -50,6 +50,10 @@ return {
                     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
                 end
 
+                if client.supports_method("textDocument/codeLens") then
+                    vim.lsp.codelens.refresh()
+                end
+
                 buf_set_keymap('n', 'gd', vim.lsp.buf.definition, "Go to definition")
                 buf_set_keymap('n', 'K', vim.lsp.buf.hover, "Hover documentation")
                 buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, "Signature help")
@@ -73,7 +77,10 @@ return {
                         hints = {
                             parameterNames = true,
                             assignVariableTypes = true,
-                        }
+                        },
+                        codelenses = {
+                            generate = true,
+                        },
                     },
                 },
             })
