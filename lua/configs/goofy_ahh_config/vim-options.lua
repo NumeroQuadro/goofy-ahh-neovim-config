@@ -20,3 +20,20 @@ vim.keymap.set({ "n", "v" }, "L", "$", { desc = "Go to end of line" })
 
 vim.o.mouse = ""
 
+
+
+-- Keymap to switch themes
+vim.keymap.set("n", "<leader>th", function()
+  local themes = {
+    "catppuccin",
+    "oxocarbon",
+  }
+  vim.ui.select(themes, {
+    prompt = "Select a theme",
+  }, function(choice)
+    if choice then
+      vim.cmd.colorscheme(choice)
+    end
+  end)
+end, { desc = "Switch theme" })
+
