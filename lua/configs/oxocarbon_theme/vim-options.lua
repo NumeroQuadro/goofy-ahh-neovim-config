@@ -15,5 +15,3 @@ vim.keymap.set("i", "jk", "<Esc>", { noremap = true, silent = true })
 vim.keymap.set({ "n", "v" }, "H", "^", { desc = "Go to first non-whitespace character" })
 vim.keymap.set({ "n", "v" }, "L", "$", { desc = "Go to end of line" })
 
-vim.o.mouse = ""
-

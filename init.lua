@@ -1,5 +1,5 @@
 -- To switch configs, change the name of the string in the line below.
-local active_config = "goofy_ahh_config"
+local active_config = "oxocarbon_theme"
 
 -- Standard lazy.nvim bootstrap
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
