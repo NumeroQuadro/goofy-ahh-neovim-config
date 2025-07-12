@@ -4,6 +4,8 @@ return {
   lazy = false,
   priority = 1000,
   config = function()
-    vim.cmd.colorscheme "catppuccin"
+    if vim.g.colorscheme == "catppuccin" then
+      vim.cmd.colorscheme "catppuccin"
+    end
   end,
 }

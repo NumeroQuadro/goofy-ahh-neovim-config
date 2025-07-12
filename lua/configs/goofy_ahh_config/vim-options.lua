@@ -1,3 +1,5 @@
+vim.g.colorscheme = "oxocarbon" -- Change "catppuccin" to your desired theme, e.g: oxocarbon
+
 vim.cmd("set ignorecase")
 vim.cmd("set expandtab")
 vim.cmd("set tabstop=4")
