@@ -123,7 +123,8 @@ return {
             })
 
             vim.keymap.set('n', 'K', vim.lsp.buf.hover, {})
-            vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {})
+            vim.keymap.set("n", "gd", function() require("peek").open() end, { desc = "Peek definition" })
+            vim.keymap.set("n", "<leader>pc", function() require("peek").close() end, { desc = "Close peek" })
             vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, {})
             vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, {})         
 
