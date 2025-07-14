@@ -59,7 +59,10 @@ return {
                 buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, "Signature help")
                 buf_set_keymap('n', '<leader>rn', vim.lsp.buf.rename, "Rename symbol")
                 buf_set_keymap('n', '<leader>ca', vim.lsp.buf.code_action, "Code action")
-                buf_set_keymap('n', 'gr', vim.lsp.buf.references, "Go to references")
+                buf_set_keymap('n', 'gr', function()
+                    local params = vim.lsp.util.make_position_params()
+                    require('telescope.builtin').lsp_references(params)
+                end, "Go to references")
                 buf_set_keymap('n', '[d', vim.diagnostic.goto_prev, "Previous diagnostic")
                 buf_set_keymap('n', ']d', vim.diagnostic.goto_next, "Next diagnostic")
                 vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', { noremap=true, silent=true })
@@ -147,6 +150,13 @@ return {
               callback = function()
                 vim.lsp.buf.format({ async = false })
               end,
+            })
+
+            vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "CursorHold" }, {
+                pattern = "*.go",
+                callback = function()
+                    vim.lsp.codelens.refresh()
+                end
             })
 
         end,
