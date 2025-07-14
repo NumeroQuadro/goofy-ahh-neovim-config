@@ -80,6 +80,7 @@ return {
                         },
                         codelenses = {
                             generate = true,
+                            references = true,
                         },
                     },
                 },

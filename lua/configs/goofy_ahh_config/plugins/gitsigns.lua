@@ -12,5 +12,6 @@ return {
             current_line_blame_formatter = " <author>, <author_time:%Y-%m-%d> - <summary>",
         })
         vim.keymap.set("n", "<leader>gb", ":Gitsigns blame_line<CR>", { desc = "git blame line" })
+        vim.keymap.set("n", "<leader>hr", ":Gitsigns reset_hunk<CR>", { desc = "git reset hunk" })
     end,
 }
