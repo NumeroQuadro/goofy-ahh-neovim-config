@@ -47,3 +47,62 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 vim.keymap.set("n", "<leader>v", "<cmd>vsplit<CR>", { desc = "Split window vertically" })
 vim.keymap.set("n", "<leader>s", "<cmd>split<CR>", { desc = "Split window horizontally" })
 
+-- Custom terminal setup
+vim.api.nvim_create_autocmd('TermOpen', {
+    group = vim.api.nvim_create_augroup('custom-term-open', { clear = true }),
+    callback = function()
+        vim.opt.number = false
+        vim.opt.relativenumber = false
+    end,
+})
+
+local term_info = { buf = nil, job_id = nil }
+
+function _G.toggle_terminal()
+    if term_info.buf and vim.api.nvim_buf_is_loaded(term_info.buf) then
+        local term_win_id = vim.fn.bufwinid(term_info.buf)
+        if term_win_id ~= -1 then
+            vim.api.nvim_win_hide(term_win_id)
+        else
+            vim.cmd.vnew()
+            vim.api.nvim_win_set_buf(0, term_info.buf)
+            vim.cmd.wincmd("J")
+            vim.api.nvim_win_set_height(0, 5)
+        end
+    else
+        vim.cmd.vnew()
+        vim.cmd.term()
+        vim.cmd.wincmd("J")
+        vim.api.nvim_win_set_height(0, 5)
+        term_info.buf = vim.api.nvim_get_current_buf()
+        term_info.job_id = vim.bo[term_info.buf].channel
+        vim.api.nvim_create_autocmd('BufWipeout', {
+            buffer = term_info.buf,
+            once = true,
+            callback = function()
+                term_info.buf = nil
+                term_info.job_id = nil
+            end,
+        })
+    end
+end
+
+vim.keymap.set("n", "<leader>st", "<cmd>lua _G.toggle_terminal()<CR>", { desc = "Toggle terminal" })
+
+vim.keymap.set("n", "<leader>mr", function()
+    if term_info.job_id then
+        vim.fn.chansend(term_info.job_id, "make run\r\n")
+    else
+        print("Terminal job not started. Use <leader>st to open terminal.")
+    end
+end, { desc = "Send 'make run' to terminal" })
+
+vim.keymap.set("n", "<leader>gt", function()
+    if term_info.job_id then
+        vim.fn.chansend(term_info.job_id, "go test ./...\r\n")
+    else
+        print("Terminal job not started. Use <leader>st to open terminal.")
+    end
+end, { desc = "Send 'go test ./...' to terminal" })
+
+
