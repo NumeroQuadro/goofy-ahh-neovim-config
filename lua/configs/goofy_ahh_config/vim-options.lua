@@ -53,6 +53,8 @@ vim.api.nvim_create_autocmd('TermOpen', {
     callback = function()
         vim.opt.number = false
         vim.opt.relativenumber = false
+        -- Map Esc to exit terminal mode
+        vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true, silent = true, buffer = true })
     end,
 })
 
@@ -104,5 +106,3 @@ vim.keymap.set("n", "<leader>gt", function()
         print("Terminal job not started. Use <leader>st to open terminal.")
     end
 end, { desc = "Send 'go test ./...' to terminal" })
-
-
