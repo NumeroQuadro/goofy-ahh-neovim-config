@@ -47,6 +47,18 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 vim.keymap.set("n", "<leader>v", "<cmd>vsplit<CR>", { desc = "Split window vertically" })
 vim.keymap.set("n", "<leader>s", "<cmd>split<CR>", { desc = "Split window horizontally" })
 
+vim.keymap.set("n", "<leader>ot", function()
+    local file_dir = vim.fn.expand('%:p:h')
+    -- If the buffer is not a file, or in a new buffer, use the current working directory
+    if file_dir == "" or vim.fn.isdirectory(file_dir) == 0 then
+        file_dir = vim.fn.getcwd()
+    end
+    vim.cmd('split')
+    vim.cmd('lcd ' .. vim.fn.fnameescape(file_dir))
+    vim.cmd('term')
+end, { desc = "Open terminal in file's directory" })
+
+
 -- Custom terminal setup
 vim.api.nvim_create_autocmd('TermOpen', {
     group = vim.api.nvim_create_augroup('custom-term-open', { clear = true }),
