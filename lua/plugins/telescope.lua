@@ -28,23 +28,17 @@ return {
                     live_grep = {
                         additional_args = function(opts)
                             return {
-                                "--glob", "!*.pb",
-                                "--glob", "!*.pb.go",
-                                "--glob", "!*.pb.scratch.go",
-                                "--glob", "!*.pb.gw.go",
-                                "--glob", "!*.pb.sensitivity.go",
+                                -- General Exclusions
                                 "--glob", "!*.log",
                                 "--glob", "!*.tmp",
                                 "--glob", "!*.bak",
                                 "--glob", "!*.swp",
                                 "--glob", "!*.swo",
-                                "--glob", "!*.min.js",
-                                "--glob", "!*.min.css",
-                                "--glob", "!*.lock",
                                 "--glob", "!*.zip",
                                 "--glob", "!*.tar.gz",
                                 "--glob", "!*.rar",
                                 "--glob", "!*.7z",
+                                -- Binary / Build Artifacts
                                 "--glob", "!*.pdf",
                                 "--glob", "!*.png",
                                 "--glob", "!*.jpg",
@@ -58,7 +52,29 @@ return {
                                 "--glob", "!*.dll",
                                 "--glob", "!*.exe",
                                 "--glob", "!*.class",
-                                "--glob", "!*.jar"
+                                "--glob", "!*.jar",
+                                -- Minified files
+                                "--glob", "!*.min.js",
+                                "--glob", "!*.min.css",
+                                -- Go specific
+                                "--glob", "!go.mod",
+                                "--glob", "!go.sum",
+                                "--glob", "!vendor/**",
+                                "--glob", "!*.pb.go",
+                                "--glob", "!*.pb.gw.go",
+                                "--glob", "!*.pb.scratch.go",
+                                "--glob", "!*.pb.sensitivity.go",
+                                -- Node specific
+                                "--glob", "!node_modules/**",
+                                "--glob", "!package-lock.json",
+                                "--glob", "!yarn.lock",
+                                -- Other common build directories
+                                "--glob", "!dist/**",
+                                "--glob", "!build/**",
+                                "--glob", "!target/**",
+                                -- Lock files
+                                "--glob", "!Pipfile.lock",
+                                "--glob", "!composer.lock",
                             }
                         end,
                     },
@@ -79,12 +95,8 @@ return {
             vim.keymap.set('n', '<leader>gC', builtin.git_bcommits, {})
 
             vim.keymap.set('n', '<leader>ff', function()
-                builtin.find_files({
-                    find_command = {
-                        "rg",
-                        "--files",
-                        "--hidden",
-                        "--no-ignore",
+                builtin.live_grep({
+                    additional_args = {
                         "--glob", "!**/*_mock*",
                         "--glob", "!*.pb",
                         "--glob", "!*.pb.go",
@@ -119,7 +131,7 @@ return {
                         "--glob", "!*.jar"
                     }
                 })
-            end, { desc = "Find files (filtered)" })
+            end, { desc = "Live Grep (filtered)" })
         end
     }
 }

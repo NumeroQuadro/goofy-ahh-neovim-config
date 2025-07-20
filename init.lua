@@ -1,6 +1,3 @@
--- To switch configs, change the name of the string in the line below.
-local active_config = "goofy_ahh_config"
-
 -- Standard lazy.nvim bootstrap
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -15,12 +12,12 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Load the options for the active config
-require("configs." .. active_config .. ".vim-options")
+-- Load the main options
+require("vim-options")
 
--- Setup lazy.nvim to load plugins from the active config
+-- Setup lazy.nvim to load plugins
 require("lazy").setup({
-  spec = "configs." .. active_config .. ".plugins",
+  spec = "plugins",
   change_detection = {
     notify = false,
   },
