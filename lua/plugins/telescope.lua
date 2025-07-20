@@ -93,6 +93,7 @@ return {
             vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
             vim.keymap.set('n', '<leader>gc', builtin.git_commits, {})
             vim.keymap.set('n', '<leader>gC', builtin.git_bcommits, {})
+            vim.keymap.set('n', '<leader>gs', builtin.git_status, {})
 
             vim.keymap.set('n', '<leader>ff', function()
                 builtin.live_grep({
