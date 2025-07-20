@@ -75,6 +75,51 @@ return {
             vim.keymap.set('n', '<C-p>', builtin.find_files, {})
             vim.keymap.set('n', '<leader>d', builtin.diagnostics, {})
             vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+            vim.keymap.set('n', '<leader>gc', builtin.git_commits, {})
+            vim.keymap.set('n', '<leader>gC', builtin.git_bcommits, {})
+
+            vim.keymap.set('n', '<leader>ff', function()
+                builtin.find_files({
+                    find_command = {
+                        "rg",
+                        "--files",
+                        "--hidden",
+                        "--no-ignore",
+                        "--glob", "!**/*_mock*",
+                        "--glob", "!*.pb",
+                        "--glob", "!*.pb.go",
+                        "--glob", "!*.pb.scratch.go",
+                        "--glob", "!*.pb.gw.go",
+                        "--glob", "!*.pb.sensitivity.go",
+                        "--glob", "!*.log",
+                        "--glob", "!*.tmp",
+                        "--glob", "!*.bak",
+                        "--glob", "!*.swp",
+                        "--glob", "!*.swo",
+                        "--glob", "!*.min.js",
+                        "--glob", "!*.min.css",
+                        "--glob", "!*.lock",
+                        "--glob", "!*.zip",
+                        "--glob", "!*.tar.gz",
+                        "--glob", "!*.rar",
+                        "--glob", "!*.7z",
+                        "--glob", "!*.pdf",
+                        "--glob", "!*.png",
+                        "--glob", "!*.jpg",
+                        "--glob", "!*.jpeg",
+                        "--glob", "!*.gif",
+                        "--glob", "!*.svg",
+                        "--glob", "!*.ico",
+                        "--glob", "!*.pyc",
+                        "--glob", "!*.o",
+                        "--glob", "!*.so",
+                        "--glob", "!*.dll",
+                        "--glob", "!*.exe",
+                        "--glob", "!*.class",
+                        "--glob", "!*.jar"
+                    }
+                })
+            end, { desc = "Find files (filtered)" })
         end
     }
 }
