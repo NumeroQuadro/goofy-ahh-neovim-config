@@ -18,7 +18,7 @@ return {
                 },
             },
         })
-        vim.keymap.set('n', '<C-n>', ':Neotree filesystem reveal toggle<CR>', {})
+        vim.keymap.set('n', '<C-n>', ':Neotree filesystem reveal toggle<CR>', { desc = "Toggle Neo-tree file explorer" })
     end,
     opts = {
       -- fill any relevant options here

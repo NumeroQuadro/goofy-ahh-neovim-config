@@ -12,10 +12,10 @@ vim.opt.termguicolors = true
 vim.g.mapleader = " "
 vim.cmd("set wrap")
 
-vim.keymap.set("n", "<C-d>", "<C-d>zz")
-vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
 
-vim.keymap.set("i", "jk", "<Esc>", { noremap = true, silent = true })
+vim.keymap.set("i", "jk", "<Esc>", { noremap = true, silent = true, desc = "Exit insert mode" })
 
 vim.keymap.set({ "n", "v" }, "H", "^", { desc = "Go to first non-whitespace character" })
 vim.keymap.set({ "n", "v" }, "L", "$", { desc = "Go to end of line" })

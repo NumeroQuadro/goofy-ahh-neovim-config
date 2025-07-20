@@ -9,7 +9,7 @@ return {
         -- No extra setup is needed for that core feature.
 
         vim.keymap.set("n", "<leader>ha", function() harpoon:list():add() end, { desc = "Harpoon: Add file" })
-        vim.keymap.set("n", "<leader>hr", function() harpoon:list():remove() end, { desc = "Harpoon: Remove file" })
+        vim.keymap.set("n", "<leader>hd", function() harpoon:list():remove() end, { desc = "Harpoon: Delete file from list" })
         vim.keymap.set("n", "<leader>hm", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon: Toggle quick menu" })
 
         -- Keymaps to jump to specific marks
