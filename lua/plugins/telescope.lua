@@ -94,7 +94,7 @@ return {
             vim.keymap.set('n', '<leader>gc', builtin.git_commits, { desc = "Git commits" })
             vim.keymap.set('n', '<leader>gC', builtin.git_bcommits, { desc = "Git buffer commits" })
             vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = "Git status" })
-            vim.keymap.set('n', '<leader>ft', builtin.todos, { desc = "Find todos" })
+            -- vim.keymap.set('n', '<leader>ft', builtin.todos, { desc = "Find todos" })
             vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = "Find Buffers" })
 
             vim.keymap.set('n', '<leader>ff', function()
