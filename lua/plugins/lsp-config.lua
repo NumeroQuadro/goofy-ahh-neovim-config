@@ -23,7 +23,8 @@ return {
                     "bashls",
                     "jdtls",
                     "vimls",
-                    "jsonls"
+                    "jsonls",
+                    "protols"
                 },
             })
         end,
@@ -47,6 +48,7 @@ return {
             end
 
             local on_attach = function(client, bufnr)
+                client.offset_encoding = "utf-16"
                 if client.supports_method("textDocument/inlayHint") then
                     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
                 end
@@ -100,6 +102,7 @@ return {
             })
             lspconfig.clangd.setup({
                 on_attach = on_attach,
+                filetypes = { "c", "cpp", "objc", "objcpp" },
             })
             lspconfig.html.setup({
                 on_attach = on_attach,
@@ -121,6 +124,20 @@ return {
             })
             lspconfig.jsonls.setup({
                 on_attach = on_attach,
+            })
+
+            lspconfig.protols.setup({
+                on_attach = function(client, bufnr)
+                    on_attach(client, bufnr)
+                    vim.keymap.set('n', 'K', vim.lsp.buf.hover, { buffer = bufnr, desc = "Hover" })
+                end,
+                filetypes = { "proto" },
+                root_dir = lspconfig.util.root_pattern(".git", "go.mod", "package.json", "proto", "api"),
+                -- If you have your proto files in a directory other than the root of your project,
+                -- you need to tell protols where to find them.
+                -- For example, if your proto files are in a directory called "proto",
+                -- you can add the following to the setup:
+                -- root_dir = lspconfig.util.root_pattern("proto"),
             })
 
             vim.keymap.set('n', 'K', vim.lsp.buf.hover, {})
