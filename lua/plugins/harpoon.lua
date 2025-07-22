@@ -5,6 +5,20 @@ return {
     config = function()
         local harpoon = require("harpoon")
 
+        harpoon.setup({
+            settings = {
+                key = function()
+                    local pipe = io.popen("git branch --show-current")
+                    if pipe then
+                        local branch = pipe:read("*l")
+                        pipe:close()
+                        return branch
+                    end
+                    return nil
+                end,
+            },
+        })
+
         -- Harpoon 2 automatically handles project-specific lists.
         -- No extra setup is needed for that core feature.
 
