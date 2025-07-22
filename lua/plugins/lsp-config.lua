@@ -30,6 +30,7 @@ return {
     },
     {
         "neovim/nvim-lspconfig",
+        dependencies = { "nvim-telescope/telescope.nvim" },
         config = function()
             vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
                 vim.lsp.handlers.signature_help,
@@ -57,21 +58,13 @@ return {
                 buf_set_keymap('n', 'gd', function()
                     require('telescope.builtin').lsp_definitions()
                 end, "Go to definition")
-                buf_set_keymap('n', 'K', vim.lsp.buf.hover, "Hover documentation")
                 buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, "Signature help")
                 buf_set_keymap('n', '<leader>rn', vim.lsp.buf.rename, "Rename symbol")
                 buf_set_keymap('n', '<leader>ca', vim.lsp.buf.code_action, "Code action")
-                buf_set_keymap('n', 'gr', function()
-                    local params = vim.lsp.util.make_position_params()
-                    require('telescope.builtin').lsp_references(params)
-                end, "Go to references")
-                buf_set_keymap('n', 'gi', function()
-                    local params = vim.lsp.util.make_position_params()
-                    require('telescope.builtin').lsp_implementations(params)
-                end, "Go to implementations")
+                buf_set_keymap('n', 'gr', require('telescope.builtin').lsp_references, "Go to references")
+                buf_set_keymap('n', 'gi', require('telescope.builtin').lsp_implementations, "Go to implementations")
                 buf_set_keymap('n', '[d', vim.diagnostic.goto_prev, "Previous diagnostic")
                 buf_set_keymap('n', ']d', vim.diagnostic.goto_next, "Next diagnostic")
-                vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', { noremap=true, silent=true })
             end
 
             lspconfig.lua_ls.setup({
@@ -89,7 +82,6 @@ return {
                         },
                         codelenses = {
                             generate = true,
-                            references = true,
                         },
                     },
                 },
@@ -132,7 +124,6 @@ return {
             })
 
             vim.keymap.set('n', 'K', vim.lsp.buf.hover, {})
-            vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
             vim.keymap.set("n", "<leader>pc", function() require("peek").close() end, { desc = "Close peek" })
             vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, {})
             vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, {})         
