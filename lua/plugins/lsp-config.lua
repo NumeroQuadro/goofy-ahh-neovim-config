@@ -54,7 +54,9 @@ return {
                     vim.lsp.codelens.refresh()
                 end
 
-                buf_set_keymap('n', 'gd', vim.lsp.buf.definition, "Go to definition")
+                buf_set_keymap('n', 'gd', function()
+                    require('telescope.builtin').lsp_definitions()
+                end, "Go to definition")
                 buf_set_keymap('n', 'K', vim.lsp.buf.hover, "Hover documentation")
                 buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, "Signature help")
                 buf_set_keymap('n', '<leader>rn', vim.lsp.buf.rename, "Rename symbol")
