@@ -8,13 +8,19 @@ return {
         harpoon.setup({
             settings = {
                 key = function()
+                    local branch = nil
                     local pipe = io.popen("git branch --show-current")
                     if pipe then
-                        local branch = pipe:read("*l")
+                        branch = pipe:read("*l")
                         pipe:close()
-                        return branch
                     end
-                    return nil
+
+                    if branch and branch ~= "" then
+                        return branch
+                    else
+                        -- Fallback to current working directory if not in a git repo or detached HEAD
+                        return vim.fn.getcwd()
+                    end
                 end,
             },
         })
