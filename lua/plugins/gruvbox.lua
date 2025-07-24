@@ -1,7 +1,7 @@
 return {
   "ellisonleao/gruvbox.nvim",
   priority = 1000,
-  config = function()
+  confsssig = function()
     if vim.g.colorscheme == "gruvbox" then
       vim.cmd.colorscheme "gruvbox"
     end

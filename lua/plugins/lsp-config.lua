@@ -157,6 +157,17 @@ return {
                 wrap = true,
                 border = "rounded",
               },
+              update_in_insert = true,
+            })
+
+            vim.api.nvim_create_autocmd({ "TextChanged", "InsertLeave" }, {
+              callback = function()
+                vim.diagnostic.config({
+                  virtual_text = false,
+                  underline = true,
+                  severity_sort = true,
+                })
+              end,
             })
 
             vim.api.nvim_create_autocmd("BufWritePre", {
