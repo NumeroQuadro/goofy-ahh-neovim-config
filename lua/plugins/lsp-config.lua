@@ -14,7 +14,6 @@ return {
                     "gopls",
                     "sqlls",
                     "buf_ls",
-                    "ts_ls",
                     "pyright",
                     "clangd",
                     "html",
@@ -63,11 +62,11 @@ return {
                 buf_set_keymap('n', 'gd', builtin.lsp_definitions, { desc = 'LSP Definition (Telescope)' })
                 buf_set_keymap('n', 'gi', builtin.lsp_implementations, { desc = 'LSP Implementation (Telescope)' })
                 buf_set_keymap('n', 'gr', builtin.lsp_references, { desc = 'LSP References (Telescope)' })
-                buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, "Signature help")
-                buf_set_keymap('n', '<leader>rn', vim.lsp.buf.rename, "Rename symbol")
-                buf_set_keymap('n', '<leader>ca', vim.lsp.buf.code_action, "Code action")
-                buf_set_keymap('n', '[d', vim.diagnostic.goto_prev, "Previous diagnostic")
-                buf_set_keymap('n', ']d', vim.diagnostic.goto_next, "Next diagnostic")
+                buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, { desc = "Signature help" })
+                buf_set_keymap('n', '<leader>rn', vim.lsp.buf.rename, { desc = "Rename symbol" })
+                buf_set_keymap('n', '<leader>ca', vim.lsp.buf.code_action, { desc = "Code action" })
+                buf_set_keymap('n', '[d', vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
+                buf_set_keymap('n', ']d', vim.diagnostic.goto_next, { desc = "Next diagnostic" })
             end
 
             lspconfig.lua_ls.setup({
@@ -134,7 +133,6 @@ return {
             })
 
             vim.keymap.set('n', 'K', vim.lsp.buf.hover, {})
-            vim.keymap.set("n", "<leader>pc", function() require("peek").close() end, { desc = "Close peek" })
             vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, {})
             vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, {})         
 
