@@ -1,5 +1,6 @@
--- Standard lazy.nvim bootstrap
+-- Bootstrap lazy.nvim, a modern plugin manager for Neovim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+-- If lazy.nvim is not installed, clone it from GitHub
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
     "git",
@@ -10,15 +11,16 @@ if not vim.loop.fs_stat(lazypath) then
     lazypath,
   })
 end
+-- Prepend lazy.nvim to runtime path
 vim.opt.rtp:prepend(lazypath)
 
--- Load the main options
+-- Load core Neovim options and keymaps from a separate file
 require("vim-options")
 
--- Setup lazy.nvim to load plugins
+-- Configure lazy.nvim to load all plugins from the 'plugins' directory
 require("lazy").setup({
-  spec = "plugins",
+  spec = "plugins",             -- Directory or module where plugin specs are defined
   change_detection = {
-    notify = false,
+    notify = false,             -- Disable notifications when plugins are reloaded
   },
 })

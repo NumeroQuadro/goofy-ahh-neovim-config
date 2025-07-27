@@ -90,7 +90,13 @@ return {
                 },
             })
             lspconfig.sqlls.setup({
-                on_attach = on_attach,
+                on_attach = function(client, bufnr)
+                    -- Disable diagnostics for SQL files
+                    client.server_capabilities.diagnosticProvider = false
+                    -- Optionally, you can also clear any diagnostics on attach
+                    vim.diagnostic.disable(bufnr)
+                    if on_attach then on_attach(client, bufnr) end
+                end,
             })
             lspconfig.buf_ls.setup({
                 on_attach = on_attach,

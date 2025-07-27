@@ -72,6 +72,17 @@ vim.api.nvim_create_autocmd('TermOpen', {
 
 local term_info = { buf = nil, job_id = nil }
 
+-- Format SQL files on save using conform.nvim
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.sql",
+  callback = function()
+    local ok, conform = pcall(require, "conform")
+    if ok then
+      conform.format({ async = false })
+    end
+  end,
+})
+
 function _G.toggle_terminal()
     if term_info.buf and vim.api.nvim_buf_is_loaded(term_info.buf) then
         local term_win_id = vim.fn.bufwinid(term_info.buf)
