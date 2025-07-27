@@ -32,16 +32,7 @@ return {
         "neovim/nvim-lspconfig",
         dependencies = { "nvim-telescope/telescope.nvim" },
         config = function()
-            -- Fix for position_encoding error
-            local original_make_position_params = vim.lsp.util.make_position_params
-            vim.lsp.util.make_position_params = function(window, encoding)
-                local bufnr = vim.api.nvim_win_get_buf(window)
-                local clients = vim.lsp.get_clients({ bufnr = bufnr })
-                if #clients > 0 then
-                    encoding = encoding or clients[1].offset_encoding
-                end
-                return original_make_position_params(window, encoding or "utf-16")
-            end
+            
 
             vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
                 vim.lsp.handlers.signature_help,
@@ -53,8 +44,10 @@ return {
 
             local lspconfig = require("lspconfig")
 
-            local buf_set_keymap = function(mode, lhs, rhs, desc)
-                vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+            local buf_set_keymap = function(mode, lhs, rhs, opts)
+                opts = opts or {}
+                opts.buffer = bufnr
+                vim.keymap.set(mode, lhs, rhs, opts)
             end
 
             local on_attach = function(client, bufnr)
@@ -66,14 +59,13 @@ return {
                     vim.lsp.codelens.refresh()
                 end
 
-                buf_set_keymap('n', 'gd', function()
-                    require('telescope.builtin').lsp_definitions()
-                end, "Go to definition")
+                local builtin = require('telescope.builtin')
+                buf_set_keymap('n', 'gd', builtin.lsp_definitions, { desc = 'LSP Definition (Telescope)' })
+                buf_set_keymap('n', 'gi', builtin.lsp_implementations, { desc = 'LSP Implementation (Telescope)' })
+                buf_set_keymap('n', 'gr', builtin.lsp_references, { desc = 'LSP References (Telescope)' })
                 buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, "Signature help")
                 buf_set_keymap('n', '<leader>rn', vim.lsp.buf.rename, "Rename symbol")
                 buf_set_keymap('n', '<leader>ca', vim.lsp.buf.code_action, "Code action")
-                buf_set_keymap('n', 'gr', require('telescope.builtin').lsp_references, "Go to references")
-                buf_set_keymap('n', 'gi', require('telescope.builtin').lsp_implementations, "Go to implementations")
                 buf_set_keymap('n', '[d', vim.diagnostic.goto_prev, "Previous diagnostic")
                 buf_set_keymap('n', ']d', vim.diagnostic.goto_next, "Next diagnostic")
             end
@@ -155,15 +147,7 @@ return {
               update_in_insert = true,
             })
 
-            vim.api.nvim_create_autocmd({ "TextChanged", "InsertLeave" }, {
-              callback = function()
-                vim.diagnostic.config({
-                  virtual_text = false,
-                  underline = true,
-                  severity_sort = true,
-                })
-              end,
-            })
+            
 
             vim.api.nvim_create_autocmd("BufWritePre", {
               pattern = "*.go",

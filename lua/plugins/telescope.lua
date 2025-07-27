@@ -20,6 +20,10 @@ return {
                     },
                     -- This is the key to jumping to the right line
                     jump_type = "exact",
+                    layout_strategy = 'vertical',
+                    layout_config = {
+                        width = 0.9,
+                    },
                 },
                 pickers = {
                     find_files = {
@@ -80,13 +84,13 @@ return {
                     },
                 },
                 extensions = {
-                    ["ui-select"] = {
-                        require("telescope.themes").get_dropdown {}
-                    }
+                    -- ["ui-select"] = {
+                    --     require("telescope.themes").get_dropdown {}
+                    -- }
                 }
             })
 
-            telescope.load_extension("ui-select")
+            -- telescope.load_extension("ui-select")
             telescope.load_extension("todo-comments")
 
             vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = "Find files" })
