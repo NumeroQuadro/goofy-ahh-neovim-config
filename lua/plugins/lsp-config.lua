@@ -9,7 +9,7 @@ return {
         "williamboman/mason-lspconfig.nvim",
         config = function()
             require("mason-lspconfig").setup({
-                ensure_installed = { 
+                ensure_installed = {
                     "lua_ls",
                     "gopls",
                     "sqlls",
@@ -24,7 +24,6 @@ return {
                     "jdtls",
                     "vimls",
                     "jsonls",
-                    "protols"
                 },
             })
         end,
@@ -33,6 +32,17 @@ return {
         "neovim/nvim-lspconfig",
         dependencies = { "nvim-telescope/telescope.nvim" },
         config = function()
+            -- Fix for position_encoding error
+            local original_make_position_params = vim.lsp.util.make_position_params
+            vim.lsp.util.make_position_params = function(window, encoding)
+                local bufnr = vim.api.nvim_win_get_buf(window)
+                local clients = vim.lsp.get_clients({ bufnr = bufnr })
+                if #clients > 0 then
+                    encoding = encoding or clients[1].offset_encoding
+                end
+                return original_make_position_params(window, encoding or "utf-16")
+            end
+
             vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
                 vim.lsp.handlers.signature_help,
                 {
@@ -48,12 +58,11 @@ return {
             end
 
             local on_attach = function(client, bufnr)
-                client.offset_encoding = "utf-16"
-                if client.supports_method("textDocument/inlayHint") then
+                if client:supports_method("textDocument/inlayHint") then
                     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
                 end
 
-                if client.supports_method("textDocument/codeLens") then
+                if client:supports_method("textDocument/codeLens") then
                     vim.lsp.codelens.refresh()
                 end
 
@@ -124,20 +133,6 @@ return {
             })
             lspconfig.jsonls.setup({
                 on_attach = on_attach,
-            })
-
-            lspconfig.protols.setup({
-                on_attach = function(client, bufnr)
-                    on_attach(client, bufnr)
-                    vim.keymap.set('n', 'K', vim.lsp.buf.hover, { buffer = bufnr, desc = "Hover" })
-                end,
-                filetypes = { "proto" },
-                root_dir = lspconfig.util.root_pattern(".git", "go.mod", "package.json", "proto", "api"),
-                -- If you have your proto files in a directory other than the root of your project,
-                -- you need to tell protols where to find them.
-                -- For example, if your proto files are in a directory called "proto",
-                -- you can add the following to the setup:
-                -- root_dir = lspconfig.util.root_pattern("proto"),
             })
 
             vim.keymap.set('n', 'K', vim.lsp.buf.hover, {})
