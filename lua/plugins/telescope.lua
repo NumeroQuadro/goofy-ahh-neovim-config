@@ -8,6 +8,8 @@ return {
 
             telescope.setup({
                 defaults = {
+                    previewer = true,
+                    previewer = true,
                     vimgrep_arguments = {
                         "rg",
                         "--color=never",
@@ -79,8 +81,15 @@ return {
                                 -- Lock files
                                 "--glob", "!Pipfile.lock",
                                 "--glob", "!composer.lock",
+                                "--glob", "!cover.out",
+                                "--glob", "!coverage.out",
                             }
                         end,
+                    },
+                },
+                pickers = {
+                    lsp_references = {
+                        previewer = true,
                     },
                 },
                 extensions = {
@@ -101,6 +110,11 @@ return {
             vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = "Git status" })
             vim.keymap.set('n', '<leader>ft', "<cmd>Telescope todo-comments<cr>", { desc = "Find todos" })
             vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = "Find Buffers" })
+
+            vim.keymap.set("n", "<leader>fy", function()
+              local word = vim.fn.expand("<cword>")
+              require('telescope.builtin').live_grep({ default_text = word })
+            end, { desc = "Find word under cursor" })
 
             vim.keymap.set('n', '<leader>ff', function()
                 builtin.live_grep({
