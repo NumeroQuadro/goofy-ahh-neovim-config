@@ -86,8 +86,6 @@ return {
                             }
                         end,
                     },
-                },
-                pickers = {
                     lsp_references = {
                         previewer = true,
                     },
