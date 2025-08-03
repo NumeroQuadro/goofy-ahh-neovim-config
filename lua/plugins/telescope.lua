@@ -101,7 +101,27 @@ return {
             telescope.load_extension("todo-comments")
 
             vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = "Find files" })
-            vim.keymap.set('n', '<leader>d', builtin.diagnostics, { desc = "View diagnostics" })
+            -- Enhanced diagnostics viewing
+            vim.keymap.set('n', '<leader>d', builtin.diagnostics, { desc = "View all diagnostics" })
+            vim.keymap.set('n', '<leader>de', function()
+                builtin.diagnostics({
+                    severity_limit = "Error",
+                    prompt_title = "Errors Only"
+                })
+            end, { desc = "View errors only" })
+            vim.keymap.set('n', '<leader>dw', function()
+                builtin.diagnostics({
+                    severity_limit = "Warning",
+                    prompt_title = "Warnings and Errors"
+                })
+            end, { desc = "View warnings and errors" })
+            vim.keymap.set('n', '<leader>df', function()
+                builtin.diagnostics({
+                    bufnr = 0,
+                    prompt_title = "Current File Diagnostics"
+                })
+            end, { desc = "View current file diagnostics" })
+            
             vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = "Live grep" })
             vim.keymap.set('n', '<leader>gc', builtin.git_commits, { desc = "Git commits" })
             vim.keymap.set('n', '<leader>gC', builtin.git_bcommits, { desc = "Git buffer commits" })
