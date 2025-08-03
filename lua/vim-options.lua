@@ -9,8 +9,10 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.scrolloff = 4
 vim.opt.termguicolors = true
+vim.opt.signcolumn = "yes"
 vim.g.mapleader = " "
 vim.cmd("set wrap")
+vim.cmd("set linespace=2")
 
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
