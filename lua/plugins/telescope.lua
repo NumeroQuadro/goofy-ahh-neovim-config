@@ -109,11 +109,6 @@ return {
             vim.keymap.set('n', '<leader>ft', "<cmd>Telescope todo-comments<cr>", { desc = "Find todos" })
             vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = "Find Buffers" })
 
-            vim.keymap.set("n", "<leader>fy", function()
-              local word = vim.fn.expand("<cword>")
-              require('telescope.builtin').live_grep({ default_text = word })
-            end, { desc = "Find word under cursor" })
-
             vim.keymap.set('n', '<leader>ff', function()
                 builtin.live_grep({
                     additional_args = {
