@@ -10,6 +10,10 @@ return {
                 defaults = {
                     previewer = true,
                     previewer = true,
+                    -- Show full, untruncated file paths everywhere (no smart/truncate)
+                    path_display = function(_, path)
+                        return path
+                    end,
                     vimgrep_arguments = {
                         "rg",
                         "--color=never",
@@ -25,6 +29,9 @@ return {
                     layout_strategy = 'vertical',
                     layout_config = {
                         width = 0.95,
+                        height = 0.95,
+                        preview_cutoff = 0,   -- always show preview, even on short windows
+                        preview_height = 0.5, -- 50% of Telescope height for preview pane
                     },
                 },
                 pickers = {
@@ -86,8 +93,28 @@ return {
                             }
                         end,
                     },
+                    -- Ensure LSP pickers (gd, gi, gr) show the whole file path
                     lsp_references = {
                         previewer = true,
+                        fname_width = 200,
+                        path_display = function(_, path)
+                            return path
+                        end,
+                        show_line = true,
+                    },
+                    lsp_definitions = {
+                        fname_width = 200,
+                        path_display = function(_, path)
+                            return path
+                        end,
+                        show_line = true,
+                    },
+                    lsp_implementations = {
+                        fname_width = 200,
+                        path_display = function(_, path)
+                            return path
+                        end,
+                        show_line = true,
                     },
                 },
                 extensions = {
