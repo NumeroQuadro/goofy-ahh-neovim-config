@@ -26,6 +26,27 @@ vim.o.mouse = ""
 
 
 
+-- Auto-reload files changed outside of Neovim
+vim.opt.autoread = true
+vim.opt.confirm = true -- prompt before losing changes when reloading
+
+local auto_read_group = vim.api.nvim_create_augroup("auto-read", { clear = true })
+vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave", "BufEnter", "CursorHold", "CursorHoldI" }, {
+  group = auto_read_group,
+  pattern = "*",
+  command = "checktime",
+})
+
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  group = auto_read_group,
+  callback = function(args)
+    vim.notify("File changed on disk. Buffer reloaded: " .. (args.file or ""), vim.log.levels.INFO)
+  end,
+})
+
+-- Manual reload shortcut
+vim.keymap.set("n", "<leader>R", "<cmd>checktime<CR>", { desc = "Reload files changed on disk" })
+
 -- Keymap to switch themes
 vim.keymap.set("n", "<leader>th", function()
   local themes = {
