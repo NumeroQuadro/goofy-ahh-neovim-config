@@ -1,4 +1,5 @@
-vim.g.colorscheme = "gruvbox" -- Change "catppuccin" to your desired theme, e.g: oxocarbon
+vim.g.colorscheme = "gruvbox" -- default theme
+vim.g.gruvbox_bg_color = "#101010" -- default: slightly grey background for gruvbox
 
 vim.cmd("set ignorecase")
 vim.cmd("set expandtab")
@@ -49,18 +50,36 @@ vim.keymap.set("n", "<leader>R", "<cmd>checktime<CR>", { desc = "Reload files ch
 
 -- Keymap to switch themes
 vim.keymap.set("n", "<leader>th", function()
-  local themes = {
-    "catppuccin",
-    "oxocarbon",
-  }
-  vim.ui.select(themes, {
-    prompt = "Select a theme",
-  }, function(choice)
-    if choice then
-      vim.cmd.colorscheme(choice)
-    end
+  local themes = { "gruvbox", "black", "catppuccin", "oxocarbon" }
+  vim.ui.select(themes, { prompt = "Select a theme" }, function(choice)
+    if not choice then return end
+    -- Set the global selector so theme plugin loaders can respect it
+    vim.g.colorscheme = choice
+    vim.cmd.colorscheme(choice)
   end)
 end, { desc = "Switch theme" })
+
+-- Quick Gruvbox background shade picker
+vim.keymap.set("n", "<leader>gb", function()
+  local shades = {
+    "#000000", -- pure black
+    "#0a0a0a",
+    "#101010",
+    "#121212",
+    "#151515",
+    "#1a1a1a",
+    "#1e1e1e",
+    "#222222",
+  }
+  vim.ui.select(shades, { prompt = "Gruvbox Normal bg" }, function(choice)
+    if not choice then return end
+    vim.g.gruvbox_bg_color = choice
+    if vim.g.colorscheme == "gruvbox" then
+      -- Re-apply to force highlight update
+      vim.cmd("colorscheme gruvbox")
+    end
+  end)
+end, { desc = "Gruvbox background shade" })
 
 vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
 vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Move to lower window" })
