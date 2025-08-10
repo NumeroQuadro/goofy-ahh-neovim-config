@@ -139,7 +139,6 @@ return {
             vim.diagnostic.config({
               virtual_text = {
                 format = function(diagnostic)
-                  -- Prepend the source name to the diagnostic message
                   return string.format("%s: %s", diagnostic.source, diagnostic.message)
                 end,
               },
@@ -149,13 +148,8 @@ return {
                 border = "rounded",
               },
               update_in_insert = false,
+              -- Use Neovim's default sign text (no custom round dots)
               signs = {
-                text = {
-                  [vim.diagnostic.severity.ERROR] = "●",
-                  [vim.diagnostic.severity.WARN] = "●",
-                  [vim.diagnostic.severity.INFO] = "●",
-                  [vim.diagnostic.severity.HINT] = "●",
-                },
                 numhl = {
                   [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
                   [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",

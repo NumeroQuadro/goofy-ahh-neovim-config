@@ -18,6 +18,9 @@ return {
                 width = 32,
                 mappings = {
                     ["<space>"] = "none",
+                    -- Prevent accidental open-in-new-tab
+                    ["t"] = "none",
+                    ["T"] = "none",
                 },
             },
             filesystem = {
