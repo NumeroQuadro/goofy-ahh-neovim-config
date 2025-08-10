@@ -11,6 +11,8 @@ vim.opt.relativenumber = true
 vim.opt.scrolloff = 4
 vim.opt.termguicolors = true
 vim.opt.signcolumn = "yes"
+vim.opt.showtabline = 2
+vim.opt.hidden = true
 vim.g.mapleader = " "
 vim.cmd("set wrap")
 vim.cmd("set linespace=2")
@@ -88,6 +90,45 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 
 vim.keymap.set("n", "<leader>v", "<cmd>vsplit<CR>", { desc = "Split window vertically" })
 vim.keymap.set("n", "<leader>s", "<cmd>split<CR>", { desc = "Split window horizontally" })
+
+-- Buffer navigation and management
+vim.keymap.set("n", "]b", "<cmd>bnext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "[b", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<leader>bd", "<cmd>Bdelete<CR>", { desc = "Delete buffer (keep window)" })
+vim.keymap.set("n", "<leader>ba", function()
+  -- Delete all listed buffers
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted then
+      pcall(vim.cmd, "Bdelete " .. buf)
+    end
+  end
+end, { desc = "Delete all buffers" })
+vim.keymap.set("n", "<leader>bo", function()
+  -- Delete all other listed buffers
+  local current = vim.api.nvim_get_current_buf()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if buf ~= current and vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted then
+      pcall(vim.cmd, "Bdelete " .. buf)
+    end
+  end
+end, { desc = "Delete other buffers" })
+
+-- Tab management (treat tabs as workspaces)
+vim.keymap.set("n", "]t", "<cmd>tabnext<CR>", { desc = "Next tab" })
+vim.keymap.set("n", "[t", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
+vim.keymap.set("n", "<leader>tn", "<cmd>tabnew<CR>", { desc = "New tab" })
+vim.keymap.set("n", "<leader>tc", "<cmd>tabclose<CR>", { desc = "Close tab" })
+vim.keymap.set("n", "<leader>to", "<cmd>tab split<CR>", { desc = "Move buffer to new tab" })
+
+-- Hide Neo-tree buffer from buffer list (so it won't show in tabline buffers)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "neo-tree" },
+  callback = function(args)
+    if args.buf and vim.api.nvim_buf_is_valid(args.buf) then
+      vim.bo[args.buf].buflisted = false
+    end
+  end,
+})
 
 vim.keymap.set("n", "<leader>ot", function()
     local file_dir = vim.fn.expand('%:p:h')
