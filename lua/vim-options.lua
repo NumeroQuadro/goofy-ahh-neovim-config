@@ -126,6 +126,11 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function(args)
     if args.buf and vim.api.nvim_buf_is_valid(args.buf) then
       vim.bo[args.buf].buflisted = false
+      -- Ensure tab/buffer navigation works inside Neo-tree as well
+      vim.keymap.set('n', ']t', '<cmd>tabnext<CR>', { buffer = args.buf, silent = true })
+      vim.keymap.set('n', '[t', '<cmd>tabprevious<CR>', { buffer = args.buf, silent = true })
+      vim.keymap.set('n', ']b', '<cmd>bnext<CR>', { buffer = args.buf, silent = true })
+      vim.keymap.set('n', '[b', '<cmd>bprevious<CR>', { buffer = args.buf, silent = true })
     end
   end,
 })
