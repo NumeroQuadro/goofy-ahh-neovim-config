@@ -11,7 +11,7 @@ vim.opt.relativenumber = true
 vim.opt.scrolloff = 4
 vim.opt.termguicolors = true
 vim.opt.signcolumn = "yes"
-vim.opt.showtabline = 2
+vim.opt.showtabline = 0
 vim.opt.hidden = true
 vim.g.mapleader = " "
 vim.cmd("set wrap")
@@ -113,12 +113,7 @@ vim.keymap.set("n", "<leader>bo", function()
   end
 end, { desc = "Delete other buffers" })
 
--- Tab management (treat tabs as workspaces)
-vim.keymap.set("n", "]t", "<cmd>tabnext<CR>", { desc = "Next tab" })
-vim.keymap.set("n", "[t", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
-vim.keymap.set("n", "<leader>tn", "<cmd>tabnew<CR>", { desc = "New tab" })
-vim.keymap.set("n", "<leader>tc", "<cmd>tabclose<CR>", { desc = "Close tab" })
-vim.keymap.set("n", "<leader>to", "<cmd>tab split<CR>", { desc = "Move buffer to new tab" })
+-- Tab keymaps removed to keep workflow buffer-centric for now
 
 -- Hide Neo-tree buffer from buffer list (so it won't show in tabline buffers)
 vim.api.nvim_create_autocmd("FileType", {
@@ -126,9 +121,7 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function(args)
     if args.buf and vim.api.nvim_buf_is_valid(args.buf) then
       vim.bo[args.buf].buflisted = false
-      -- Ensure tab/buffer navigation works inside Neo-tree as well
-      vim.keymap.set('n', ']t', '<cmd>tabnext<CR>', { buffer = args.buf, silent = true })
-      vim.keymap.set('n', '[t', '<cmd>tabprevious<CR>', { buffer = args.buf, silent = true })
+      -- Keep buffer nav working from within Neo-tree
       vim.keymap.set('n', ']b', '<cmd>bnext<CR>', { buffer = args.buf, silent = true })
       vim.keymap.set('n', '[b', '<cmd>bprevious<CR>', { buffer = args.buf, silent = true })
     end
