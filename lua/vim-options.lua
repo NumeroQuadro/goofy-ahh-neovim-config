@@ -148,6 +148,39 @@ vim.api.nvim_create_autocmd('TermOpen', {
         vim.opt.relativenumber = false
         -- Map Esc to exit terminal mode
         vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { noremap = true, silent = true, buffer = true })
+        -- Clear terminal screen + scrollback (similar to kitty Cmd+K)
+        -- Note: Cmd+K is usually intercepted by the host terminal; use <C-k> inside Neovim terminal instead
+        vim.keymap.set('t', '<C-k>', function()
+            local job = vim.b.terminal_job_id
+            if job then
+                -- Clear screen then scrollback
+                vim.fn.chansend(job, 'clear; printf "\\033[3J"\r')
+            end
+        end, { noremap = true, silent = true, buffer = true, desc = 'Clear terminal screen+scrollback' })
+    end,
+})
+
+-- Auto-close terminal buffers when the job exits so :qa isn't blocked by dead terminals
+vim.api.nvim_create_autocmd('TermClose', {
+    group = vim.api.nvim_create_augroup('custom-term-close', { clear = true }),
+    callback = function(args)
+        if vim.bo[args.buf].buftype == 'terminal' then
+            vim.schedule(function()
+                pcall(vim.cmd, 'bdelete! ' .. args.buf)
+            end)
+        end
+    end,
+})
+
+-- On quit, make sure all terminal buffers are wiped silently
+vim.api.nvim_create_autocmd('QuitPre', {
+    group = vim.api.nvim_create_augroup('custom-quit-cleanup', { clear = true }),
+    callback = function()
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == 'terminal' then
+                pcall(vim.cmd, 'bdelete! ' .. buf)
+            end
+        end
     end,
 })
 
@@ -194,6 +227,15 @@ function _G.toggle_terminal()
 end
 
 vim.keymap.set("n", "<leader>st", "<cmd>lua _G.toggle_terminal()<CR>", { desc = "Toggle terminal" })
+
+-- Clear the managed toggle terminal from normal mode
+vim.keymap.set("n", "<leader>sk", function()
+    if term_info.job_id then
+        vim.fn.chansend(term_info.job_id, 'clear; printf "\\033[3J"\r')
+    else
+        print("Terminal job not started. Use <leader>st to open terminal.")
+    end
+end, { desc = "Clear terminal screen+scrollback" })
 
 vim.keymap.set("n", "<leader>mr", function()
     if term_info.job_id then

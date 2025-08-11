@@ -23,6 +23,7 @@ return {
                         "--column",
                         "--smart-case",
                         "--hidden",
+                        "--glob", "!**/.git/**",
                     },
                     -- This is the key to jumping to the right line
                     jump_type = "exact",
@@ -41,6 +42,7 @@ return {
                     live_grep = {
                         additional_args = function(opts)
                             return {
+                                "--glob", "!**/.git/**",
                                 -- General Exclusions
                                 "--glob", "!*.log",
                                 "--glob", "!*.tmp",
@@ -159,6 +161,7 @@ return {
             vim.keymap.set('n', '<leader>ff', function()
                 builtin.live_grep({
                     additional_args = {
+                        "--glob", "!**/.git/**",
                         "--glob", "!**/*_mock*",
                         "--glob", "!*.pb",
                         "--glob", "!*.pb.go",
