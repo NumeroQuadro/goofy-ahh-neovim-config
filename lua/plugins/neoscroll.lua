@@ -13,11 +13,11 @@ return {
       "zz",
       "zb",
     },
-    hide_cursor = true, -- Hide cursor while scrolling
+    hide_cursor = false, -- Keep cursor visible for smooth trail plugins
     stop_eof = true, -- Stop at end of file
     respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
     cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
-    easing_function = "quadratic", -- Easing function to use
+    easing_function = "cubic", -- Smoother easing
     pre_hook = nil, -- Function to run before the scrolling animation starts
     post_hook = nil, -- Function to run after the scrolling animation ends
     performance_mode = false, -- Disable "Performance Mode" on all buffers.

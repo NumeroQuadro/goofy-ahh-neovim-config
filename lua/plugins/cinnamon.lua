@@ -1,5 +1,6 @@
 return {
   "declancm/cinnamon.nvim",
+  enabled = false,
   event = "VeryLazy",
   config = function()
     require("cinnamon").setup({
