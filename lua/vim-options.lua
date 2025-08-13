@@ -59,7 +59,6 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = "netrw",
   callback = function(args)
     local netrw_buf = args.buf
-    local win = vim.api.nvim_get_current_win()
     -- Capture previous buffer for this netrw instance
     if vim.t.netrw_prev_buf and vim.api.nvim_buf_is_valid(vim.t.netrw_prev_buf) then
       vim.b.netrw_prev_buf = vim.t.netrw_prev_buf
@@ -104,77 +103,6 @@ vim.api.nvim_create_autocmd("FileType", {
     end
     vim.keymap.set("n", "q", close_netrw, { buffer = netrw_buf, nowait = true, silent = true, desc = "Quit netrw (cancel)" })
     vim.keymap.set("n", "<Esc>", close_netrw, { buffer = netrw_buf, nowait = true, silent = true, desc = "Quit netrw (cancel)" })
-
-    -- Create pinned top/bottom overlays with the current directory (3 lines each)
-    local function path_text()
-      local dir = vim.b.netrw_curdir or vim.fn.getcwd()
-      return vim.fn.fnamemodify(dir, ':~:.')
-    end
-
-    local function ensure_overlay_windows()
-      if not vim.api.nvim_win_is_valid(win) then return end
-      local width = vim.api.nvim_win_get_width(win)
-      local height = vim.api.nvim_win_get_height(win)
-
-      local function open_line(name, row)
-        local wkey = 'netrw_ctx_' .. name
-        local bkey = 'netrw_ctx_' .. name .. '_buf'
-        local w = vim.w[wkey]
-        local b = vim.w[bkey]
-        if w and vim.api.nvim_win_is_valid(w) and b and vim.api.nvim_buf_is_valid(b) then
-          -- update size/pos and content
-          pcall(vim.api.nvim_win_set_config, w, { relative = 'win', win = win, row = row, col = 0, width = width, height = 1, focusable = false, zindex = 60 })
-          vim.api.nvim_buf_set_lines(b, 0, -1, false, { path_text() })
-          return
-        end
-        b = vim.api.nvim_create_buf(false, true)
-        vim.api.nvim_buf_set_lines(b, 0, -1, false, { path_text() })
-        vim.bo[b].modifiable = false
-        w = vim.api.nvim_open_win(b, false, { relative = 'win', win = win, row = row, col = 0, width = width, height = 1, focusable = false, style = 'minimal', zindex = 60 })
-        vim.api.nvim_set_option_value('winhl', 'Normal:TabLine', { win = w })
-        vim.w[wkey] = w
-        vim.w[bkey] = b
-      end
-
-      -- Top 3 lines
-      open_line('top1', 0)
-      open_line('top2', 1)
-      open_line('top3', 2)
-      -- Bottom 3 lines
-      open_line('bot3', math.max(height - 1, 0))
-      open_line('bot2', math.max(height - 2, 0))
-      open_line('bot1', math.max(height - 3, 0))
-    end
-
-    local function close_overlay_windows()
-      for _, key in ipairs({ 'top1', 'top2', 'top3', 'bot1', 'bot2', 'bot3' }) do
-        local w = vim.w['netrw_ctx_' .. key]
-        local b = vim.w['netrw_ctx_' .. key .. '_buf']
-        if w and vim.api.nvim_win_is_valid(w) then pcall(vim.api.nvim_win_close, w, true) end
-        if b and vim.api.nvim_buf_is_valid(b) then pcall(vim.api.nvim_buf_delete, b, { force = true }) end
-        vim.w['netrw_ctx_' .. key] = nil
-        vim.w['netrw_ctx_' .. key .. '_buf'] = nil
-      end
-    end
-
-    ensure_overlay_windows()
-    -- Keep overlays updated on resize and dir changes (approximate with CursorMoved)
-    vim.api.nvim_create_autocmd({ 'WinResized', 'CursorMoved' }, {
-      buffer = netrw_buf,
-      callback = function()
-        if vim.bo.filetype ~= 'netrw' then return end
-        ensure_overlay_windows()
-      end,
-      desc = 'Update netrw pinned context overlays',
-    })
-    vim.api.nvim_create_autocmd({ 'BufWipeout', 'BufHidden' }, {
-      buffer = netrw_buf,
-      once = true,
-      callback = function()
-        close_overlay_windows()
-      end,
-      desc = 'Cleanup netrw pinned context overlays',
-    })
   end,
 })
 
