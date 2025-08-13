@@ -10,12 +10,101 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.scrolloff = 4
 vim.opt.termguicolors = true
+vim.opt.cursorline = true
 vim.opt.signcolumn = "yes"
-vim.opt.showtabline = 0
+vim.opt.showtabline = 2
 vim.opt.hidden = true
 vim.g.mapleader = " "
 vim.cmd("set wrap")
 vim.cmd("set linespace=2")
+
+-- Netrw sane defaults
+vim.g.netrw_banner = 0            -- hide banner
+vim.g.netrw_liststyle = 3         -- tree view
+vim.g.netrw_keepdir = 1           -- keep :pwd stable when browsing
+
+-- Helper: open netrw at a directory and place cursor on the current file (no extra highlighting)
+local function open_netrw_dir(dir_path, opts)
+  opts = opts or {}
+  local previous_file = vim.fn.expand('%:p')
+  -- Remember the previous buffer in this tab to return to it on cancel
+  vim.t.netrw_prev_buf = vim.api.nvim_get_current_buf()
+  if opts.sidebar then
+    vim.cmd('topleft vsplit')
+    vim.cmd('vertical resize 30')
+    vim.cmd('edit ' .. vim.fn.fnameescape(dir_path))
+  else
+    vim.cmd('edit ' .. vim.fn.fnameescape(dir_path))
+  end
+  local current_name = vim.fn.fnamemodify(previous_file, ':t')
+  if current_name == '' then return end
+  pcall(vim.cmd, 'normal! gg')
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local target_line = nil
+  for i, line in ipairs(lines) do
+    if (#line >= #current_name and line:sub(-#current_name) == current_name)
+      or (#line >= #current_name + 1 and line:sub(-(#current_name + 1)) == current_name .. '/') then
+      target_line = i
+      break
+    end
+  end
+  if target_line then
+    vim.api.nvim_win_set_cursor(0, { target_line, 0 })
+  end
+end
+
+-- In netrw, allow canceling (keep tab open): 'q' or <Esc>
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("custom-netrw-mappings", { clear = true }),
+  pattern = "netrw",
+  callback = function(args)
+    local netrw_buf = args.buf
+    -- Capture previous buffer for this netrw instance
+    if vim.t.netrw_prev_buf and vim.api.nvim_buf_is_valid(vim.t.netrw_prev_buf) then
+      vim.b.netrw_prev_buf = vim.t.netrw_prev_buf
+    elseif vim.fn.bufnr('#') > 0 and vim.api.nvim_buf_is_valid(vim.fn.bufnr('#')) then
+      vim.b.netrw_prev_buf = vim.fn.bufnr('#')
+    end
+    local function close_netrw()
+      local wins = vim.api.nvim_tabpage_list_wins(0)
+      if #wins > 1 then
+        -- Multiple windows: only close the netrw window
+        pcall(vim.api.nvim_win_close, 0, true)
+        return
+      end
+      -- Single window: switch back to previous buffer if possible
+      local prev = vim.b.netrw_prev_buf
+      if prev and vim.api.nvim_buf_is_valid(prev) and prev ~= netrw_buf then
+        pcall(vim.api.nvim_set_current_buf, prev)
+      else
+        local alt = vim.fn.bufnr('#')
+        if alt > 0 and vim.api.nvim_buf_is_valid(alt) and alt ~= netrw_buf then
+          pcall(vim.cmd, 'buffer #')
+        else
+          -- Fallback to any listed normal buffer
+          local fallback = nil
+          for _, b in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.api.nvim_buf_is_loaded(b)
+              and vim.bo[b].buflisted
+              and vim.bo[b].buftype == ''
+              and b ~= netrw_buf then
+              fallback = b
+              break
+            end
+          end
+          if fallback then
+            pcall(vim.api.nvim_set_current_buf, fallback)
+          end
+        end
+      end
+      if vim.api.nvim_buf_is_valid(netrw_buf) then
+        pcall(vim.cmd, 'bdelete ' .. netrw_buf)
+      end
+    end
+    vim.keymap.set("n", "q", close_netrw, { buffer = netrw_buf, nowait = true, silent = true, desc = "Quit netrw (cancel)" })
+    vim.keymap.set("n", "<Esc>", close_netrw, { buffer = netrw_buf, nowait = true, silent = true, desc = "Quit netrw (cancel)" })
+  end,
+})
 
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
@@ -34,10 +123,14 @@ vim.opt.autoread = true
 vim.opt.confirm = true -- prompt before losing changes when reloading
 
 local auto_read_group = vim.api.nvim_create_augroup("auto-read", { clear = true })
-vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave", "BufEnter", "CursorHold", "CursorHoldI" }, {
+-- Only trigger on focus/terminal events and avoid prompting when there are unsaved buffers
+vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   group = auto_read_group,
-  pattern = "*",
-  command = "checktime",
+  callback = function()
+    if #vim.fn.getbufinfo({ bufmodified = 1 }) == 0 then
+      vim.cmd("checktime")
+    end
+  end,
 })
 
 vim.api.nvim_create_autocmd("FileChangedShellPost", {
@@ -91,6 +184,42 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 vim.keymap.set("n", "<leader>v", "<cmd>vsplit<CR>", { desc = "Split window vertically" })
 vim.keymap.set("n", "<leader>s", "<cmd>split<CR>", { desc = "Split window horizontally" })
 
+-- Tabs
+vim.keymap.set("n", "<leader>tn", "<cmd>tabnew<CR>", { desc = "New tab" })
+vim.keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close tab" })
+vim.keymap.set("n", "<leader>to", "<cmd>tabonly<CR>", { desc = "Close other tabs" })
+-- Switch tabs without leader
+vim.keymap.set("n", "]t", "<cmd>tabnext<CR>", { desc = "Next tab" })
+vim.keymap.set("n", "[t", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
+vim.keymap.set("n", "<leader>ts", "<cmd>tab split<CR>", { desc = "Open current buffer in new tab" })
+
+-- Open native netrw (edit directory) from current file's directory (fallback to CWD)
+vim.keymap.set("n", "<leader>fe", function()
+  local file_dir = vim.fn.expand('%:p:h')
+  if file_dir == "" or vim.fn.isdirectory(file_dir) == 0 then
+    file_dir = vim.fn.getcwd()
+  end
+  open_netrw_dir(file_dir, { sidebar = false })
+end, { desc = "Explore current directory" })
+
+-- Open netrw as a left sidebar from current file's directory (manual split + edit)
+vim.keymap.set("n", "<leader>le", function()
+  local file_dir = vim.fn.expand('%:p:h')
+  if file_dir == "" or vim.fn.isdirectory(file_dir) == 0 then
+    file_dir = vim.fn.getcwd()
+  end
+  open_netrw_dir(file_dir, { sidebar = true })
+end, { desc = "Left Explore (sidebar)" })
+
+-- Quick open Explore with '-' like many terminals (edit directory in place)
+vim.keymap.set("n", "-", function()
+  local file_dir = vim.fn.expand('%:p:h')
+  if file_dir == "" or vim.fn.isdirectory(file_dir) == 0 then
+    file_dir = vim.fn.getcwd()
+  end
+  open_netrw_dir(file_dir, { sidebar = false })
+end, { desc = "Explore current directory" })
+
 -- Buffer navigation and management
 vim.keymap.set("n", "]b", "<cmd>bnext<CR>", { desc = "Next buffer" })
 vim.keymap.set("n", "[b", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
@@ -116,17 +245,7 @@ end, { desc = "Delete other buffers" })
 -- Tab keymaps removed to keep workflow buffer-centric for now
 
 -- Hide Neo-tree buffer from buffer list (so it won't show in tabline buffers)
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "neo-tree" },
-  callback = function(args)
-    if args.buf and vim.api.nvim_buf_is_valid(args.buf) then
-      vim.bo[args.buf].buflisted = false
-      -- Keep buffer nav working from within Neo-tree
-      vim.keymap.set('n', ']b', '<cmd>bnext<CR>', { buffer = args.buf, silent = true })
-      vim.keymap.set('n', '[b', '<cmd>bprevious<CR>', { buffer = args.buf, silent = true })
-    end
-  end,
-})
+-- Neo-tree was removed; cleanup of related autocmds is no longer necessary
 
 vim.keymap.set("n", "<leader>ot", function()
     local file_dir = vim.fn.expand('%:p:h')

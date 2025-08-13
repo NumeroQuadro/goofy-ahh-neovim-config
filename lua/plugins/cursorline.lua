@@ -3,8 +3,8 @@ return {
   config = function()
     require('nvim-cursorline').setup {
       cursorline = {
-        enable = true,  -- Enable cursorline highlighting for visibility
-        timeout = 50,
+        enable = false,  -- Use native cursorline to avoid blink
+        timeout = 0,
         number = false,
       },
       cursorword = {
