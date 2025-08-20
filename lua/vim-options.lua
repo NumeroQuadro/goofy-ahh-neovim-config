@@ -53,6 +53,28 @@ local function open_netrw_dir(dir_path, opts)
   end
 end
 
+-- Find a reasonable project root by walking up from a start directory
+local function find_project_root(start_dir)
+  local dir = start_dir or vim.fn.expand('%:p:h')
+  if dir == "" or vim.fn.isdirectory(dir) == 0 then
+    dir = vim.fn.getcwd()
+  end
+  local markers = { '.git', '.hg', '.svn', 'package.json', 'go.mod', 'pyproject.toml', 'Cargo.toml', 'Makefile' }
+  local previous = nil
+  while dir ~= previous do
+    for _, marker in ipairs(markers) do
+      if vim.fn.isdirectory(dir .. '/' .. marker) == 1 or vim.fn.filereadable(dir .. '/' .. marker) == 1 then
+        return dir
+      end
+    end
+    previous = dir
+    local parent = vim.fn.fnamemodify(dir, ':h')
+    if parent == dir then break end
+    dir = parent
+  end
+  return vim.fn.getcwd()
+end
+
 -- In netrw, allow canceling (keep tab open): 'q' or <Esc>
 vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("custom-netrw-mappings", { clear = true }),
@@ -226,43 +248,12 @@ vim.keymap.set("n", "]t", "<cmd>tabnext<CR>", { desc = "Next tab" })
 vim.keymap.set("n", "[t", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
 vim.keymap.set("n", "<leader>ts", "<cmd>tab split<CR>", { desc = "Open current buffer in new tab" })
 
--- Open Telescope find_files from project root and highlight current file
+-- Open native netrw at project root and place cursor on current file
 vim.keymap.set("n", "<leader>fe", function()
-  -- Find project root (look for .git, or fallback to cwd)
-  local function find_project_root()
-    local current_file = vim.fn.expand('%:p')
-    if current_file == "" then
-      return vim.fn.getcwd()
-    end
-    
-    local current_dir = vim.fn.expand('%:p:h')
-    local root_markers = {'.git', '.gitignore', 'package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'Makefile'}
-    
-    -- Start from current file's directory and go up
-    local dir = current_dir
-    while dir ~= "/" do
-      for _, marker in ipairs(root_markers) do
-        if vim.fn.isdirectory(dir .. '/' .. marker) == 1 or vim.fn.filereadable(dir .. '/' .. marker) == 1 then
-          return dir
-        end
-      end
-      local parent = vim.fn.fnamemodify(dir, ':h')
-      if parent == dir then break end
-      dir = parent
-    end
-    
-    return vim.fn.getcwd() -- fallback to current working directory
-  end
-  
-  local project_root = find_project_root()
-  local current_file = vim.fn.expand('%:t') -- just filename, not full path
-  
-  require('telescope.builtin').find_files({
-    cwd = project_root,
-    default_text = current_file, -- This will highlight/select the current file
-    prompt_title = "Files in " .. vim.fn.fnamemodify(project_root, ':~')
-  })
-end, { desc = "Find files from project root" })
+  local start_dir = vim.fn.expand('%:p:h')
+  local root = find_project_root(start_dir)
+  open_netrw_dir(root, { sidebar = false })
+end, { desc = "Explore project root" })
 
 -- Open netrw as a left sidebar from current file's directory (manual split + edit)
 vim.keymap.set("n", "<leader>le", function()
