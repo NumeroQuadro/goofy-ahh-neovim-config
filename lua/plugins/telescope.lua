@@ -10,6 +10,7 @@ return {
                 defaults = {
                     previewer = true,
                     previewer = true,
+                    sorting_strategy = 'ascending',
                     -- Show full, untruncated file paths everywhere (no smart/truncate)
                     path_display = function(_, path)
                         return path

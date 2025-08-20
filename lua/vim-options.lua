@@ -103,6 +103,39 @@ vim.api.nvim_create_autocmd("FileType", {
     end
     vim.keymap.set("n", "q", close_netrw, { buffer = netrw_buf, nowait = true, silent = true, desc = "Quit netrw (cancel)" })
     vim.keymap.set("n", "<Esc>", close_netrw, { buffer = netrw_buf, nowait = true, silent = true, desc = "Quit netrw (cancel)" })
+    
+    -- File management shortcuts
+    vim.keymap.set("n", "a", "%", { buffer = netrw_buf, nowait = true, silent = true, desc = "Create new file" })
+    vim.keymap.set("n", "A", "d", { buffer = netrw_buf, nowait = true, silent = true, desc = "Create new directory" })
+    vim.keymap.set("n", "r", "R", { buffer = netrw_buf, nowait = true, silent = true, desc = "Rename file/directory" })
+    vim.keymap.set("n", "dd", "D", { buffer = netrw_buf, nowait = true, silent = true, desc = "Delete file/directory" })
+    vim.keymap.set("n", "yy", function()
+      -- Copy file - get filename under cursor and prompt for destination
+      local filename = vim.fn.expand("<cfile>")
+      if filename == "" then
+        print("No file under cursor")
+        return
+      end
+      local dest = vim.fn.input("Copy '" .. filename .. "' to: ", filename .. "_copy")
+      if dest ~= "" then
+        local cmd = "cp " .. vim.fn.shellescape(filename) .. " " .. vim.fn.shellescape(dest)
+        local result = vim.fn.system(cmd)
+        if vim.v.shell_error == 0 then
+          print("Copied: " .. filename .. " -> " .. dest)
+          vim.cmd("edit .") -- Refresh netrw
+        else
+          print("Copy failed: " .. result)
+        end
+      end
+    end, { buffer = netrw_buf, nowait = true, silent = true, desc = "Copy file" })
+    
+    -- Additional helpful shortcuts
+    vim.keymap.set("n", ".", function()
+      vim.cmd("edit .") -- Refresh netrw view
+    end, { buffer = netrw_buf, nowait = true, silent = true, desc = "Refresh view" })
+    
+    vim.keymap.set("n", "h", "-", { buffer = netrw_buf, nowait = true, silent = true, desc = "Go up directory" })
+    vim.keymap.set("n", "l", "<CR>", { buffer = netrw_buf, nowait = true, silent = true, desc = "Enter directory/open file" })
   end,
 })
 
@@ -193,14 +226,43 @@ vim.keymap.set("n", "]t", "<cmd>tabnext<CR>", { desc = "Next tab" })
 vim.keymap.set("n", "[t", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
 vim.keymap.set("n", "<leader>ts", "<cmd>tab split<CR>", { desc = "Open current buffer in new tab" })
 
--- Open native netrw (edit directory) from current file's directory (fallback to CWD)
+-- Open Telescope find_files from project root and highlight current file
 vim.keymap.set("n", "<leader>fe", function()
-  local file_dir = vim.fn.expand('%:p:h')
-  if file_dir == "" or vim.fn.isdirectory(file_dir) == 0 then
-    file_dir = vim.fn.getcwd()
+  -- Find project root (look for .git, or fallback to cwd)
+  local function find_project_root()
+    local current_file = vim.fn.expand('%:p')
+    if current_file == "" then
+      return vim.fn.getcwd()
+    end
+    
+    local current_dir = vim.fn.expand('%:p:h')
+    local root_markers = {'.git', '.gitignore', 'package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'Makefile'}
+    
+    -- Start from current file's directory and go up
+    local dir = current_dir
+    while dir ~= "/" do
+      for _, marker in ipairs(root_markers) do
+        if vim.fn.isdirectory(dir .. '/' .. marker) == 1 or vim.fn.filereadable(dir .. '/' .. marker) == 1 then
+          return dir
+        end
+      end
+      local parent = vim.fn.fnamemodify(dir, ':h')
+      if parent == dir then break end
+      dir = parent
+    end
+    
+    return vim.fn.getcwd() -- fallback to current working directory
   end
-  open_netrw_dir(file_dir, { sidebar = false })
-end, { desc = "Explore current directory" })
+  
+  local project_root = find_project_root()
+  local current_file = vim.fn.expand('%:t') -- just filename, not full path
+  
+  require('telescope.builtin').find_files({
+    cwd = project_root,
+    default_text = current_file, -- This will highlight/select the current file
+    prompt_title = "Files in " .. vim.fn.fnamemodify(project_root, ':~')
+  })
+end, { desc = "Find files from project root" })
 
 -- Open netrw as a left sidebar from current file's directory (manual split + edit)
 vim.keymap.set("n", "<leader>le", function()
@@ -219,6 +281,67 @@ vim.keymap.set("n", "-", function()
   end
   open_netrw_dir(file_dir, { sidebar = false })
 end, { desc = "Explore current directory" })
+
+-- Global file operations (work from anywhere)
+vim.keymap.set("n", "<leader>nf", function()
+  local current_dir = vim.fn.expand('%:p:h')
+  if current_dir == "" or vim.fn.isdirectory(current_dir) == 0 then
+    current_dir = vim.fn.getcwd()
+  end
+  local filename = vim.fn.input("New file name: ", current_dir .. "/")
+  if filename ~= "" then
+    vim.cmd("edit " .. vim.fn.fnameescape(filename))
+  end
+end, { desc = "Create new file" })
+
+vim.keymap.set("n", "<leader>nd", function()
+  local current_dir = vim.fn.expand('%:p:h')
+  if current_dir == "" or vim.fn.isdirectory(current_dir) == 0 then
+    current_dir = vim.fn.getcwd()
+  end
+  local dirname = vim.fn.input("New directory name: ", current_dir .. "/")
+  if dirname ~= "" then
+    vim.fn.mkdir(dirname, "p")
+    print("Created directory: " .. dirname)
+  end
+end, { desc = "Create new directory" })
+
+vim.keymap.set("n", "<leader>rf", function()
+  local current_file = vim.fn.expand('%:p')
+  if current_file == "" then
+    print("No file to rename")
+    return
+  end
+  local new_name = vim.fn.input("Rename file to: ", current_file)
+  if new_name ~= "" and new_name ~= current_file then
+    local success = vim.fn.rename(current_file, new_name)
+    if success == 0 then
+      vim.cmd("edit " .. vim.fn.fnameescape(new_name))
+      vim.cmd("bdelete #") -- Delete the old buffer
+      print("Renamed: " .. vim.fn.fnamemodify(current_file, ':t') .. " -> " .. vim.fn.fnamemodify(new_name, ':t'))
+    else
+      print("Rename failed")
+    end
+  end
+end, { desc = "Rename current file" })
+
+vim.keymap.set("n", "<leader>df", function()
+  local current_file = vim.fn.expand('%:p')
+  if current_file == "" then
+    print("No file to delete")
+    return
+  end
+  local confirm = vim.fn.input("Delete '" .. vim.fn.fnamemodify(current_file, ':t') .. "'? (y/N): ")
+  if confirm:lower() == "y" then
+    local success = vim.fn.delete(current_file)
+    if success == 0 then
+      vim.cmd("bdelete!")
+      print("Deleted: " .. vim.fn.fnamemodify(current_file, ':t'))
+    else
+      print("Delete failed")
+    end
+  end
+end, { desc = "Delete current file" })
 
 -- Buffer navigation and management
 vim.keymap.set("n", "]b", "<cmd>bnext<CR>", { desc = "Next buffer" })
