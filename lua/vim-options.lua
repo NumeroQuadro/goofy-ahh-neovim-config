@@ -258,6 +258,8 @@ vim.keymap.set("n", "<leader>to", "<cmd>tabonly<CR>", { desc = "Close other tabs
 vim.keymap.set("n", "]t", "<cmd>tabnext<CR>", { desc = "Next tab" })
 vim.keymap.set("n", "[t", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
 vim.keymap.set("n", "<leader>ts", "<cmd>tab split<CR>", { desc = "Open current buffer in new tab" })
+-- Duplicate current tab's active window in a new tab (alias)
+vim.keymap.set("n", "<leader>tt", "<cmd>tab split<CR>", { desc = "Duplicate current tab" })
 
 -- Open native netrw at project root and place cursor on current file
 vim.keymap.set("n", "<leader>fe", function()
