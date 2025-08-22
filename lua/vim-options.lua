@@ -32,18 +32,21 @@ local function open_netrw_dir(dir_path, opts)
   if opts.sidebar then
     vim.cmd('topleft vsplit')
     vim.cmd('vertical resize 30')
-    vim.cmd('edit ' .. vim.fn.fnameescape(dir_path))
+    vim.cmd('keepalt keepjumps edit ' .. vim.fn.fnameescape(dir_path))
   else
-    vim.cmd('edit ' .. vim.fn.fnameescape(dir_path))
+    vim.cmd('keepalt keepjumps edit ' .. vim.fn.fnameescape(dir_path))
   end
-  local current_name = vim.fn.fnamemodify(previous_file, ':t')
-  if current_name == '' then return end
+  local focus_name = opts.focus_name
+  if not focus_name or focus_name == '' then
+    focus_name = vim.fn.fnamemodify(previous_file, ':t')
+  end
+  if focus_name == '' then return end
   pcall(vim.cmd, 'normal! gg')
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   local target_line = nil
   for i, line in ipairs(lines) do
-    if (#line >= #current_name and line:sub(-#current_name) == current_name)
-      or (#line >= #current_name + 1 and line:sub(-(#current_name + 1)) == current_name .. '/') then
+    if (#line >= #focus_name and line:sub(-#focus_name) == focus_name)
+      or (#line >= #focus_name + 1 and line:sub(-(#focus_name + 1)) == focus_name .. '/') then
       target_line = i
       break
     end
@@ -144,7 +147,7 @@ vim.api.nvim_create_autocmd("FileType", {
         local result = vim.fn.system(cmd)
         if vim.v.shell_error == 0 then
           print("Copied: " .. filename .. " -> " .. dest)
-          vim.cmd("edit .") -- Refresh netrw
+          vim.cmd("keepjumps edit .") -- Refresh netrw without adding a jump
         else
           print("Copy failed: " .. result)
         end
@@ -153,11 +156,19 @@ vim.api.nvim_create_autocmd("FileType", {
     
     -- Additional helpful shortcuts
     vim.keymap.set("n", ".", function()
-      vim.cmd("edit .") -- Refresh netrw view
+      vim.cmd("keepjumps edit .") -- Refresh netrw view without adding a jump
     end, { buffer = netrw_buf, nowait = true, silent = true, desc = "Refresh view" })
     
     vim.keymap.set("n", "h", "-", { buffer = netrw_buf, nowait = true, silent = true, desc = "Go up directory" })
     vim.keymap.set("n", "l", "<CR>", { buffer = netrw_buf, nowait = true, silent = true, desc = "Enter directory/open file" })
+
+    -- Reset to initial root and re-focus the original file
+    vim.keymap.set("n", "gr", function()
+      local root = vim.t.netrw_initial_root or vim.fn.getcwd()
+      local initial_file = vim.t.netrw_initial_file
+      local focus = initial_file and vim.fn.fnamemodify(initial_file, ':t') or nil
+      open_netrw_dir(root, { sidebar = false, focus_name = focus })
+    end, { buffer = netrw_buf, nowait = true, silent = true, desc = "Reset file picker to initial state" })
   end,
 })
 
@@ -250,9 +261,13 @@ vim.keymap.set("n", "<leader>ts", "<cmd>tab split<CR>", { desc = "Open current b
 
 -- Open native netrw at project root and place cursor on current file
 vim.keymap.set("n", "<leader>fe", function()
+  local current_file_path = vim.fn.expand('%:p')
   local start_dir = vim.fn.expand('%:p:h')
   local root = find_project_root(start_dir)
-  open_netrw_dir(root, { sidebar = false })
+  -- Record initial state for this tab so we can reset later from inside netrw
+  vim.t.netrw_initial_root = root
+  vim.t.netrw_initial_file = current_file_path
+  open_netrw_dir(root, { sidebar = false, focus_name = vim.fn.fnamemodify(current_file_path, ':t') })
 end, { desc = "Explore project root" })
 
 -- Open netrw as a left sidebar from current file's directory (manual split + edit)
@@ -420,15 +435,61 @@ vim.api.nvim_create_autocmd('QuitPre', {
 local term_info = { buf = nil, job_id = nil }
 
 -- Format SQL files on save using conform.nvim
+-- Format-on-save for SQL with ability to temporarily disable
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.sql",
   callback = function()
+    -- Respect buffer/global toggles
+    if vim.b.sql_format_on_save == false or vim.g.sql_format_on_save == false then
+      return
+    end
     local ok, conform = pcall(require, "conform")
     if ok then
       conform.format({ async = false })
     end
   end,
 })
+
+-- User commands to toggle SQL format-on-save
+vim.api.nvim_create_user_command("SqlFormatOnSaveDisable", function()
+  vim.b.sql_format_on_save = false
+  print("SQL format on save: disabled (buffer)")
+end, {})
+
+vim.api.nvim_create_user_command("SqlFormatOnSaveEnable", function()
+  vim.b.sql_format_on_save = nil
+  print("SQL format on save: enabled (buffer)")
+end, {})
+
+vim.api.nvim_create_user_command("SqlFormatOnSaveToggle", function()
+  if vim.b.sql_format_on_save == false then
+    vim.b.sql_format_on_save = nil
+    print("SQL format on save: enabled (buffer)")
+  else
+    vim.b.sql_format_on_save = false
+    print("SQL format on save: disabled (buffer)")
+  end
+end, {})
+
+vim.api.nvim_create_user_command("SqlFormatOnSaveDisableGlobal", function()
+  vim.g.sql_format_on_save = false
+  print("SQL format on save: disabled (global)")
+end, {})
+
+vim.api.nvim_create_user_command("SqlFormatOnSaveEnableGlobal", function()
+  vim.g.sql_format_on_save = nil
+  print("SQL format on save: enabled (global)")
+end, {})
+
+vim.api.nvim_create_user_command("SqlFormatOnSaveToggleGlobal", function()
+  if vim.g.sql_format_on_save == false then
+    vim.g.sql_format_on_save = nil
+    print("SQL format on save: enabled (global)")
+  else
+    vim.g.sql_format_on_save = false
+    print("SQL format on save: disabled (global)")
+  end
+end, {})
 
 function _G.toggle_terminal()
     if term_info.buf and vim.api.nvim_buf_is_loaded(term_info.buf) then
