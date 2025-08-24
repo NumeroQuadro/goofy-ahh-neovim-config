@@ -211,7 +211,7 @@ vim.keymap.set("n", "<leader>R", "<cmd>checktime<CR>", { desc = "Reload files ch
 
 -- Keymap to switch themes
 vim.keymap.set("n", "<leader>th", function()
-  local themes = { "gruvbox", "black", "catppuccin", "oxocarbon" }
+  local themes = { "gruvbox", "black", "catppuccin", "oxocarbon", "everforest" }
   vim.ui.select(themes, { prompt = "Select a theme" }, function(choice)
     if not choice then return end
     -- Set the global selector so theme plugin loaders can respect it
@@ -378,16 +378,7 @@ end, { desc = "Delete other buffers" })
 -- Hide Neo-tree buffer from buffer list (so it won't show in tabline buffers)
 -- Neo-tree was removed; cleanup of related autocmds is no longer necessary
 
-vim.keymap.set("n", "<leader>ot", function()
-    local file_dir = vim.fn.expand('%:p:h')
-    -- If the buffer is not a file, or in a new buffer, use the current working directory
-    if file_dir == "" or vim.fn.isdirectory(file_dir) == 0 then
-        file_dir = vim.fn.getcwd()
-    end
-    vim.cmd('split')
-    vim.cmd('lcd ' .. vim.fn.fnameescape(file_dir))
-    vim.cmd('term')
-end, { desc = "Open terminal in file's directory" })
+
 
 
 -- Custom terminal setup
@@ -433,8 +424,6 @@ vim.api.nvim_create_autocmd('QuitPre', {
         end
     end,
 })
-
-local term_info = { buf = nil, job_id = nil }
 
 -- Format SQL files on save using conform.nvim
 -- Format-on-save for SQL with ability to temporarily disable
@@ -483,6 +472,7 @@ vim.api.nvim_create_user_command("SqlFormatOnSaveEnableGlobal", function()
   print("SQL format on save: enabled (global)")
 end, {})
 
+
 vim.api.nvim_create_user_command("SqlFormatOnSaveToggleGlobal", function()
   if vim.g.sql_format_on_save == false then
     vim.g.sql_format_on_save = nil
@@ -492,59 +482,3 @@ vim.api.nvim_create_user_command("SqlFormatOnSaveToggleGlobal", function()
     print("SQL format on save: disabled (global)")
   end
 end, {})
-
-function _G.toggle_terminal()
-    if term_info.buf and vim.api.nvim_buf_is_loaded(term_info.buf) then
-        local term_win_id = vim.fn.bufwinid(term_info.buf)
-        if term_win_id ~= -1 then
-            vim.api.nvim_win_hide(term_win_id)
-        else
-            vim.cmd.vnew()
-            vim.api.nvim_win_set_buf(0, term_info.buf)
-            vim.cmd.wincmd("J")
-            vim.api.nvim_win_set_height(0, 5)
-        end
-    else
-        vim.cmd.vnew()
-        vim.cmd.term()
-        vim.cmd.wincmd("J")
-        vim.api.nvim_win_set_height(0, 5)
-        term_info.buf = vim.api.nvim_get_current_buf()
-        term_info.job_id = vim.bo[term_info.buf].channel
-        vim.api.nvim_create_autocmd('BufWipeout', {
-            buffer = term_info.buf,
-            once = true,
-            callback = function()
-                term_info.buf = nil
-                term_info.job_id = nil
-            end,
-        })
-    end
-end
-
-vim.keymap.set("n", "<leader>st", "<cmd>lua _G.toggle_terminal()<CR>", { desc = "Toggle terminal" })
-
--- Clear the managed toggle terminal from normal mode
-vim.keymap.set("n", "<leader>sk", function()
-    if term_info.job_id then
-        vim.fn.chansend(term_info.job_id, 'clear; printf "\\033[3J"\r')
-    else
-        print("Terminal job not started. Use <leader>st to open terminal.")
-    end
-end, { desc = "Clear terminal screen+scrollback" })
-
-vim.keymap.set("n", "<leader>mr", function()
-    if term_info.job_id then
-        vim.fn.chansend(term_info.job_id, "make run\r\n")
-    else
-        print("Terminal job not started. Use <leader>st to open terminal.")
-    end
-end, { desc = "Send 'make run' to terminal" })
-
-vim.keymap.set("n", "<leader>gt", function()
-    if term_info.job_id then
-        vim.fn.chansend(term_info.job_id, "go test ./...\r\n")
-    else
-        print("Terminal job not started. Use <leader>st to open terminal.")
-    end
-end, { desc = "Send 'go test ./...' to terminal" })
