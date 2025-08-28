@@ -46,6 +46,12 @@ return {
         end,
         group = format_sync_grp,
       })
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "go",
+        callback = function()
+          vim.keymap.set("n", "<leader>rn", "<cmd>GoRename<CR>", { buffer = true, desc = "Rename Go symbol" })
+        end,
+      })
     end,
     event = {"CmdlineEnter"},
     ft = { "go", "gomod" },
