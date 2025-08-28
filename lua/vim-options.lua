@@ -211,7 +211,7 @@ vim.keymap.set("n", "<leader>R", "<cmd>checktime<CR>", { desc = "Reload files ch
 
 -- Keymap to switch themes
 vim.keymap.set("n", "<leader>th", function()
-  local themes = { "gruvbox", "black", "catppuccin", "oxocarbon", "everforest" }
+  local themes = { "gruvbox", "black", "catppuccin", "oxocarbon", "everforest", "monochrome" }
   vim.ui.select(themes, { prompt = "Select a theme" }, function(choice)
     if not choice then return end
     -- Set the global selector so theme plugin loaders can respect it
