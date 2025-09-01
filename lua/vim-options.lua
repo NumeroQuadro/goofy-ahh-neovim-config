@@ -482,3 +482,34 @@ vim.api.nvim_create_user_command("SqlFormatOnSaveToggleGlobal", function()
     print("SQL format on save: disabled (global)")
   end
 end, {})
+
+
+-- Global fallbacks for LSP nav: prefer LSP via Telescope if attached; otherwise use Vim defaults
+local function has_lsp()
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  return clients and next(clients) ~= nil
+end
+
+vim.keymap.set('n', 'gd', function()
+  if has_lsp() then
+    require('telescope.builtin').lsp_definitions()
+  else
+    vim.cmd('normal! gd')
+  end
+end, { desc = 'Go to definition (LSP if available)' })
+
+vim.keymap.set('n', 'gi', function()
+  if has_lsp() then
+    require('telescope.builtin').lsp_implementations()
+  else
+    vim.cmd('normal! gi')
+  end
+end, { desc = 'Go to implementation (LSP if available)' })
+
+vim.keymap.set('n', 'gr', function()
+  if has_lsp() then
+    require('telescope.builtin').lsp_references()
+  else
+    vim.cmd('normal! gr')
+  end
+end, { desc = 'Find references (LSP if available)' })

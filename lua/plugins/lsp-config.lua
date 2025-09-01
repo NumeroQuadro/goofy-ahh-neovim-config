@@ -43,7 +43,7 @@ return {
 
             local lspconfig = require("lspconfig")
 
-            local buf_set_keymap = function(mode, lhs, rhs, opts)
+            local buf_set_keymap = function(bufnr, mode, lhs, rhs, opts)
                 opts = opts or {}
                 opts.buffer = bufnr
                 vim.keymap.set(mode, lhs, rhs, opts)
@@ -59,14 +59,14 @@ return {
                 end
 
                 local builtin = require('telescope.builtin')
-                buf_set_keymap('n', 'gd', builtin.lsp_definitions, { desc = 'LSP Definition (Telescope)' })
-                buf_set_keymap('n', 'gi', builtin.lsp_implementations, { desc = 'LSP Implementation (Telescope)' })
-                buf_set_keymap('n', 'gr', builtin.lsp_references, { desc = 'LSP References (Telescope)' })
-                buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, { desc = "Signature help" })
-                buf_set_keymap('n', '<leader>rn', vim.lsp.buf.rename, { desc = "Rename symbol" })
-                buf_set_keymap('n', '<leader>ca', vim.lsp.buf.code_action, { desc = "Code action" })
-                buf_set_keymap('n', '[d', vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
-                buf_set_keymap('n', ']d', vim.diagnostic.goto_next, { desc = "Next diagnostic" })
+                buf_set_keymap(bufnr, 'n', 'gd', builtin.lsp_definitions, { desc = 'LSP Definition (Telescope)' })
+                buf_set_keymap(bufnr, 'n', 'gi', builtin.lsp_implementations, { desc = 'LSP Implementation (Telescope)' })
+                buf_set_keymap(bufnr, 'n', 'gr', builtin.lsp_references, { desc = 'LSP References (Telescope)' })
+                buf_set_keymap(bufnr, 'i', '<C-k>', vim.lsp.buf.signature_help, { desc = "Signature help" })
+                buf_set_keymap(bufnr, 'n', '<leader>rn', vim.lsp.buf.rename, { desc = "Rename symbol" })
+                buf_set_keymap(bufnr, 'n', '<leader>ca', vim.lsp.buf.code_action, { desc = "Code action" })
+                buf_set_keymap(bufnr, 'n', '[d', vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
+                buf_set_keymap(bufnr, 'n', ']d', vim.diagnostic.goto_next, { desc = "Next diagnostic" })
             end
 
             lspconfig.lua_ls.setup({
