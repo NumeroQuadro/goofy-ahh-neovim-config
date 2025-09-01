@@ -5,6 +5,7 @@ return {
         config = function()
             local telescope = require("telescope")
             local builtin = require("telescope.builtin")
+            local actions = require("telescope.actions")
 
             telescope.setup({
                 defaults = {
@@ -128,6 +129,15 @@ return {
                         hijack_netrw = false,
                         grouped = true,
                         hidden = true,
+                        mappings = {
+                            ["i"] = {
+                                ["<C-t>"] = actions.select_tab,
+                            },
+                            ["n"] = {
+                                ["t"] = actions.select_tab,
+                                ["<C-t>"] = actions.select_tab,
+                            },
+                        }
                     }
                 }
             })
@@ -164,6 +174,15 @@ return {
             vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = "Git status" })
             vim.keymap.set('n', '<leader>ft', "<cmd>Telescope todo-comments<cr>", { desc = "Find todos" })
             vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = "Find Buffers" })
+
+            -- Live grep with literal search (no regex needed)
+            vim.keymap.set('n', '<leader>fF', function()
+                builtin.live_grep({
+                    additional_args = function()
+                        return { '-F' }
+                    end,
+                })
+            end, { desc = "Live Grep (literal)" })
 
             -- Floating file browser with preview at project root
             vim.keymap.set('n', '<leader>fe', function()

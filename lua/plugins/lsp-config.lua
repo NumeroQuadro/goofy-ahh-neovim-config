@@ -44,6 +44,7 @@ return {
             local lspconfig = require("lspconfig")
 
             local buf_set_keymap = function(bufnr, mode, lhs, rhs, opts)
+
                 opts = opts or {}
                 opts.buffer = bufnr
                 vim.keymap.set(mode, lhs, rhs, opts)
