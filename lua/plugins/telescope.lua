@@ -5,6 +5,7 @@ return {
         config = function()
             local telescope = require("telescope")
             local builtin = require("telescope.builtin")
+            local actions = require("telescope.actions")
 
             telescope.setup({
                 defaults = {
@@ -128,6 +129,15 @@ return {
                         hijack_netrw = false,
                         grouped = true,
                         hidden = true,
+                        mappings = {
+                            ["i"] = {
+                                ["<C-t>"] = actions.select_tab,
+                            },
+                            ["n"] = {
+                                ["t"] = actions.select_tab,
+                                ["<C-t>"] = actions.select_tab,
+                            },
+                        }
                     }
                 }
             })
