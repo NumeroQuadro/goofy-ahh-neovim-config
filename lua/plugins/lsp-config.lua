@@ -43,13 +43,12 @@ return {
 
             local lspconfig = require("lspconfig")
 
-            local buf_set_keymap = function(mode, lhs, rhs, opts)
-                opts = opts or {}
-                opts.buffer = bufnr
-                vim.keymap.set(mode, lhs, rhs, opts)
-            end
-
             local on_attach = function(client, bufnr)
+                local buf_set_keymap = function(mode, lhs, rhs, opts)
+                    opts = opts or {}
+                    opts.buffer = bufnr
+                    vim.keymap.set(mode, lhs, rhs, opts)
+                end
                 if client:supports_method("textDocument/inlayHint") then
                     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
                 end
