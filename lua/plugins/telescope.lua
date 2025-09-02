@@ -221,6 +221,7 @@ return {
             vim.keymap.set('n', '<leader>ff', function()
                 builtin.live_grep({
                     additional_args = {
+                        -- regex (default) search with filters
                         "--glob", "!**/.git/**",
                         "--glob", "!**/*_mock*",
                         "--glob", "!*.pb",
@@ -257,6 +258,49 @@ return {
                     }
                 })
             end, { desc = "Live Grep (filtered)" })
+
+            -- Literal (fixed-string) grep: special characters don't need escaping
+            vim.keymap.set('n', '<leader>fF', function()
+                builtin.live_grep({
+                    prompt_title = "Literal Grep (-F)",
+                    additional_args = {
+                        "-F", -- treat the pattern as a literal string
+                        "--glob", "!**/.git/**",
+                        "--glob", "!**/*_mock*",
+                        "--glob", "!*.pb",
+                        "--glob", "!*.pb.go",
+                        "--glob", "!*.pb.scratch.go",
+                        "--glob", "!*.pb.gw.go",
+                        "--glob", "!*.pb.sensitivity.go",
+                        "--glob", "!*.log",
+                        "--glob", "!*.tmp",
+                        "--glob", "!*.bak",
+                        "--glob", "!*.swp",
+                        "--glob", "!*.swo",
+                        "--glob", "!*.min.js",
+                        "--glob", "!*.min.css",
+                        "--glob", "!*.lock",
+                        "--glob", "!*.zip",
+                        "--glob", "!*.tar.gz",
+                        "--glob", "!*.rar",
+                        "--glob", "!*.7z",
+                        "--glob", "!*.pdf",
+                        "--glob", "!*.png",
+                        "--glob", "!*.jpg",
+                        "--glob", "!*.jpeg",
+                        "--glob", "!*.gif",
+                        "--glob", "!*.svg",
+                        "--glob", "!*.ico",
+                        "--glob", "!*.pyc",
+                        "--glob", "!*.o",
+                        "--glob", "!*.so",
+                        "--glob", "!*.dll",
+                        "--glob", "!*.exe",
+                        "--glob", "!*.class",
+                        "--glob", "!*.jar"
+                    }
+                })
+            end, { desc = "Live Grep (literal, no regex)" })
         end
     }
 }
