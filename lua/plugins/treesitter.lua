@@ -3,6 +3,7 @@ return {
     build = ":TSUpdate",
     dependencies = {
         "nvim-treesitter/nvim-treesitter-context",
+        "nvim-treesitter/nvim-treesitter-textobjects",
     },
     config = function()
         require("nvim-treesitter.configs").setup({
@@ -43,10 +44,18 @@ return {
                 goto_next_start = {
                   ["]f"] = "@function.outer",
                   ["]c"] = "@class.outer",
+                  ["]a"] = "@parameter.inner",
                 },
                 goto_previous_start = {
                   ["[f"] = "@function.outer",
                   ["[c"] = "@class.outer",
+                  ["[a"] = "@parameter.inner",
+                },
+                goto_next_end = {
+                  ["]A"] = "@parameter.inner",
+                },
+                goto_previous_end = {
+                  ["[A"] = "@parameter.inner",
                 },
               },
               swap = {

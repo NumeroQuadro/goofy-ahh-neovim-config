@@ -43,6 +43,47 @@ return {
 
             local lspconfig = require("lspconfig")
 
+            local function jump_to_first_location_or_picker(result, picker_name)
+                if not result or vim.tbl_isempty(result) then return false end
+                local locations = result
+                -- Some servers return a table with a single element being the result
+                if result.result then locations = result.result end
+                if not locations or vim.tbl_isempty(locations) then return false end
+                if #locations == 1 then
+                    local loc = locations[1]
+                    if loc.targetUri then
+                        vim.lsp.util.jump_to_location({ uri = loc.targetUri, range = loc.targetSelectionRange }, "utf-8")
+                    else
+                        vim.lsp.util.jump_to_location(loc, "utf-8")
+                    end
+                else
+                    -- Multiple results: show Telescope picker for context
+                    local ok, builtin = pcall(require, 'telescope.builtin')
+                    if ok then
+                        local picker = builtin[picker_name]
+                        if type(picker) == "function" then picker() end
+                    else
+                        -- Fallback: quickfix list
+                        vim.lsp.util.set_qflist(vim.lsp.util.locations_to_items(locations, "utf-8"))
+                        vim.cmd("copen")
+                    end
+                end
+                return true
+            end
+
+            local function goto_definition_smart()
+                local params = vim.lsp.util.make_position_params()
+                vim.lsp.buf_request(0, 'textDocument/definition', params, function(_, def)
+                    if jump_to_first_location_or_picker(def, 'lsp_definitions') then return end
+                    -- Fallback to type definition (common for Go struct/iface types)
+                    vim.lsp.buf_request(0, 'textDocument/typeDefinition', params, function(_, tdef)
+                        if jump_to_first_location_or_picker(tdef, 'lsp_type_definitions') then return end
+                        -- Last resort: declaration
+                        vim.lsp.buf.declaration()
+                    end)
+                end)
+            end
+
             local on_attach = function(client, bufnr)
                 local buf_set_keymap = function(mode, lhs, rhs, opts)
                     opts = opts or {}
@@ -58,7 +99,8 @@ return {
                 end
 
                 local builtin = require('telescope.builtin')
-                buf_set_keymap('n', 'gd', builtin.lsp_definitions, { desc = 'LSP Definition (Telescope)' })
+                buf_set_keymap('n', 'gd', goto_definition_smart, { desc = 'LSP Definition (smart)' })
+                buf_set_keymap('n', 'gT', builtin.lsp_type_definitions, { desc = 'LSP Type Definition' })
                 buf_set_keymap('n', 'gi', builtin.lsp_implementations, { desc = 'LSP Implementation (Telescope)' })
                 buf_set_keymap('n', 'gr', builtin.lsp_references, { desc = 'LSP References (Telescope)' })
                 buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, { desc = "Signature help" })
