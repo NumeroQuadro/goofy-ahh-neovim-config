@@ -7,15 +7,20 @@ return {
             local builtin = require("telescope.builtin")
             local actions = require("telescope.actions")
 
+            -- Render file paths relative to project root (cwd) in pickers
+            local function rel_path_display(_, path)
+                -- :~:. → home as ~, and relative to cwd; trim leading ./ if present
+                local p = vim.fn.fnamemodify(path, ":~:.")
+                return (p:gsub('^%./', ''))
+            end
+
             telescope.setup({
                 defaults = {
                     previewer = true,
                     previewer = true,
                     sorting_strategy = 'ascending',
-                    -- Show full, untruncated file paths everywhere (no smart/truncate)
-                    path_display = function(_, path)
-                        return path
-                    end,
+                    -- Show paths relative to cwd (project root)
+                    path_display = rel_path_display,
                     vimgrep_arguments = {
                         "rg",
                         "--color=never",
@@ -101,23 +106,17 @@ return {
                     lsp_references = {
                         previewer = true,
                         fname_width = 200,
-                        path_display = function(_, path)
-                            return path
-                        end,
+                        path_display = rel_path_display,
                         show_line = true,
                     },
                     lsp_definitions = {
                         fname_width = 200,
-                        path_display = function(_, path)
-                            return path
-                        end,
+                        path_display = rel_path_display,
                         show_line = true,
                     },
                     lsp_implementations = {
                         fname_width = 200,
-                        path_display = function(_, path)
-                            return path
-                        end,
+                        path_display = rel_path_display,
                         show_line = true,
                     },
                 },
