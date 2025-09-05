@@ -89,9 +89,9 @@ return {
                 local util = vim.lsp.util
                 if util and util.show_document then
                     if location.targetUri then
-                        util.show_document({ uri = location.targetUri, range = location.targetSelectionRange or location.targetRange }, { focus = true })
+                        util.show_document({ uri = location.targetUri, range = location.targetSelectionRange or location.targetRange }, "utf-8")
                     else
-                        util.show_document(location, { focus = true })
+                        util.show_document(location, "utf-8")
                     end
                 else
                     -- Fallback for older Neovim versions
