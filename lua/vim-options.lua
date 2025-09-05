@@ -485,3 +485,27 @@ vim.api.nvim_create_user_command("SqlFormatOnSaveToggleGlobal", function()
     print("SQL format on save: disabled (global)")
   end
 end, {})
+
+-- Fallback LSP keymaps
+-- these will do nothing if the lsp is not attached
+vim.keymap.set('n', 'gd', function()
+  pcall(vim.lsp.buf.definition)
+end, { silent = true, desc = "LSP Definition" })
+
+vim.keymap.set('n', 'gi', function()
+  local ok, builtin = pcall(require, 'telescope.builtin')
+  if ok then
+    pcall(builtin.lsp_implementations)
+  else
+    pcall(vim.lsp.buf.implementation)
+  end
+end, { silent = true, desc = "LSP Implementation" })
+
+vim.keymap.set('n', 'gr', function()
+  local ok, builtin = pcall(require, 'telescope.builtin')
+  if ok then
+    pcall(builtin.lsp_references)
+  else
+    pcall(vim.lsp.buf.references)
+  end
+end, { silent = true, desc = "LSP References" })
