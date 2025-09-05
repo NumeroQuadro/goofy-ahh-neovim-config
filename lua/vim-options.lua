@@ -492,6 +492,10 @@ vim.keymap.set('n', 'gd', function()
   pcall(vim.lsp.buf.definition)
 end, { silent = true, desc = "LSP Definition" })
 
+vim.keymap.set('n', 'gT', function()
+  pcall(vim.lsp.buf.type_definition)
+end, { silent = true, desc = "LSP Type Definition" })
+
 vim.keymap.set('n', 'gi', function()
   local ok, builtin = pcall(require, 'telescope.builtin')
   if ok then
