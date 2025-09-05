@@ -43,6 +43,25 @@ return {
 
             local lspconfig = require("lspconfig")
 
+            -- Compatibility helper for opening LSP locations without using deprecated APIs
+            local function open_lsp_location(location)
+                local util = vim.lsp.util
+                if util and util.show_document then
+                    if location.targetUri then
+                        util.show_document({ uri = location.targetUri, range = location.targetSelectionRange or location.targetRange }, { focus = true })
+                    else
+                        util.show_document(location, { focus = true })
+                    end
+                else
+                    -- Fallback for older Neovim versions
+                    if location.targetUri then
+                        util.jump_to_location({ uri = location.targetUri, range = location.targetSelectionRange or location.targetRange }, "utf-8")
+                    else
+                        util.jump_to_location(location, "utf-8")
+                    end
+                end
+            end
+
             local function jump_to_first_location_or_picker(result, picker_name)
                 if not result or vim.tbl_isempty(result) then return false end
                 local locations = result
@@ -51,11 +70,7 @@ return {
                 if not locations or vim.tbl_isempty(locations) then return false end
                 if #locations == 1 then
                     local loc = locations[1]
-                    if loc.targetUri then
-                        vim.lsp.util.jump_to_location({ uri = loc.targetUri, range = loc.targetSelectionRange }, "utf-8")
-                    else
-                        vim.lsp.util.jump_to_location(loc, "utf-8")
-                    end
+                    open_lsp_location(loc)
                 else
                     -- Multiple results: show Telescope picker for context
                     local ok, builtin = pcall(require, 'telescope.builtin')
