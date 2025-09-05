@@ -133,38 +133,7 @@ return {
                 end)
             end
 
-            -- Global fallbacks so gd/gi/gr work even before LSP attaches
-            local function lsp_attached()
-                local clients = vim.lsp.get_clients({ bufnr = 0 })
-                return clients and #clients > 0
-            end
-
-            -- Note: buffer-local mappings from on_attach override these when available
-            vim.keymap.set('n', 'gd', function()
-                if lsp_attached() then
-                    goto_definition_smart()
-                    return ''
-                end
-                return vim.api.nvim_replace_termcodes('gd', true, false, true)
-            end, { expr = true, silent = true, desc = 'Definition (LSP if attached, else Vim gd)' })
-
-            vim.keymap.set('n', 'gi', function()
-                if lsp_attached() then
-                    local ok, builtin = pcall(require, 'telescope.builtin')
-                    if ok then builtin.lsp_implementations() else vim.lsp.buf.implementation() end
-                    return ''
-                end
-                return vim.api.nvim_replace_termcodes('gi', true, false, true)
-            end, { expr = true, silent = true, desc = 'Implementations (LSP if attached, else Vim gi)' })
-
-            vim.keymap.set('n', 'gr', function()
-                if lsp_attached() then
-                    local ok, builtin = pcall(require, 'telescope.builtin')
-                    if ok then builtin.lsp_references() else vim.lsp.buf.references() end
-                    return ''
-                end
-                return vim.api.nvim_replace_termcodes('gr', true, false, true)
-            end, { expr = true, silent = true, desc = 'References (LSP if attached, else Vim gr)' })
+            -- Note: use buffer-local mappings in on_attach; avoid global expr mappings to prevent timeouts
 
             local on_attach = function(client, bufnr)
                 local buf_set_keymap = function(mode, lhs, rhs, opts)
