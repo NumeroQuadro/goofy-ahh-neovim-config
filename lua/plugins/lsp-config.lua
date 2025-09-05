@@ -43,6 +43,47 @@ return {
 
             local lspconfig = require("lspconfig")
 
+            -- Deduplicate LSP locations by uri + start position
+            local function dedupe_locations(locations)
+                if not locations or vim.tbl_isempty(locations) then return {} end
+                local seen = {}
+                local unique = {}
+                for _, loc in ipairs(locations) do
+                    local uri = loc.uri or loc.targetUri or ""
+                    local range = loc.range or loc.targetSelectionRange or loc.targetRange or { start = { line = -1, character = -1 } }
+                    local s = range.start or { line = -1, character = -1 }
+                    local key = string.format("%s:%d:%d", uri, s.line or -1, s.character or -1)
+                    if not seen[key] then
+                        seen[key] = true
+                        table.insert(unique, loc)
+                    end
+                end
+                return unique
+            end
+
+            -- Present a list of locations in Telescope without re-requesting the LSP
+            local function present_locations_with_telescope(locations, title)
+                local ok, pickers = pcall(require, 'telescope.pickers')
+                if not ok then
+                    vim.lsp.util.set_qflist(vim.lsp.util.locations_to_items(locations, 'utf-8'))
+                    vim.cmd('copen')
+                    return
+                end
+                local finders = require('telescope.finders')
+                local conf = require('telescope.config').values
+                local make_entry = require('telescope.make_entry')
+                local items = vim.lsp.util.locations_to_items(locations, 'utf-8')
+                pickers.new({}, {
+                    prompt_title = title or 'LSP Results',
+                    finder = finders.new_table({
+                        results = items,
+                        entry_maker = make_entry.gen_from_quickfix(),
+                    }),
+                    sorter = conf.generic_sorter({}),
+                    previewer = conf.qflist_previewer({}),
+                }):find()
+            end
+
             -- Compatibility helper for opening LSP locations without using deprecated APIs
             local function open_lsp_location(location)
                 local util = vim.lsp.util
@@ -68,20 +109,13 @@ return {
                 -- Some servers return a table with a single element being the result
                 if result.result then locations = result.result end
                 if not locations or vim.tbl_isempty(locations) then return false end
+                locations = dedupe_locations(locations)
                 if #locations == 1 then
                     local loc = locations[1]
                     open_lsp_location(loc)
                 else
-                    -- Multiple results: show Telescope picker for context
-                    local ok, builtin = pcall(require, 'telescope.builtin')
-                    if ok then
-                        local picker = builtin[picker_name]
-                        if type(picker) == "function" then picker() end
-                    else
-                        -- Fallback: quickfix list
-                        vim.lsp.util.set_qflist(vim.lsp.util.locations_to_items(locations, "utf-8"))
-                        vim.cmd("copen")
-                    end
+                    -- Multiple results: show Telescope picker using these exact (deduped) locations
+                    present_locations_with_telescope(locations, 'LSP ' .. (picker_name or 'Results'))
                 end
                 return true
             end
@@ -115,7 +149,13 @@ return {
 
                 local builtin = require('telescope.builtin')
                 buf_set_keymap('n', 'gd', goto_definition_smart, { desc = 'LSP Definition (smart)' })
-                buf_set_keymap('n', 'gT', builtin.lsp_type_definitions, { desc = 'LSP Type Definition' })
+                buf_set_keymap('n', 'gT', function()
+                    local params = vim.lsp.util.make_position_params()
+                    vim.lsp.buf_request(0, 'textDocument/typeDefinition', params, function(_, tdef)
+                        local ok = jump_to_first_location_or_picker(tdef, 'Type Definitions')
+                        if not ok then return end
+                    end)
+                end, { desc = 'LSP Type Definition (deduped)' })
                 buf_set_keymap('n', 'gi', builtin.lsp_implementations, { desc = 'LSP Implementation (Telescope)' })
                 buf_set_keymap('n', 'gr', builtin.lsp_references, { desc = 'LSP References (Telescope)' })
                 buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, { desc = "Signature help" })
