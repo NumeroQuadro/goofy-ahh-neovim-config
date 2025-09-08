@@ -488,6 +488,9 @@ end, {})
 
 -- Fallback LSP keymaps
 -- these will do nothing if the lsp is not attached
+vim.keymap.set('n', '<leader>e', function()
+  vim.diagnostic.open_float(nil, { scope = 'line' })
+end, { desc = "Open diagnostics float" })
 vim.keymap.set('n', 'gd', function()
   pcall(vim.lsp.buf.definition)
 end, { silent = true, desc = "LSP Definition" })

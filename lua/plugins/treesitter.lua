@@ -20,6 +20,8 @@ return {
                   "go",      -- for Golang
                   "proto",   -- for Protocol Buffers (proto3)
                   "sql",     -- for SQL
+                  "kotlin",  -- for Kotlin
+                  "java",    -- for Java
             },
             highlight = { enable = true },
             indent = { enable = true },

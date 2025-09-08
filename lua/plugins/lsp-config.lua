@@ -23,6 +23,7 @@ return {
                     "jdtls",
                     "vimls",
                     "jsonls",
+                    "kotlin_language_server",
                 },
             })
         end,
@@ -170,6 +171,34 @@ return {
                 buf_set_keymap('n', 'K', vim.lsp.buf.hover, { desc = "Hover" })
                 buf_set_keymap({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, { desc = "Code action" })
                 buf_set_keymap('n', '<leader>e', vim.diagnostic.open_float, { desc = "Open float" })
+            end
+
+            -- Setup LSP servers that benefit from default capabilities/on_attach
+            -- Kotlin
+            if lspconfig.kotlin_language_server then
+                lspconfig.kotlin_language_server.setup({
+                    capabilities = capabilities,
+                    on_attach = on_attach,
+                    settings = {
+                        kotlin = {
+                            compiler = {
+                                jvm = {
+                                    target = "17",
+                                },
+                            },
+                        },
+                    },
+                })
+            end
+
+            -- Java (Eclipse JDT Language Server)
+            if lspconfig.jdtls then
+                lspconfig.jdtls.setup({
+                    capabilities = capabilities,
+                    on_attach = on_attach,
+                    root_dir = lspconfig.util.root_pattern("gradlew", "mvnw", ".git"),
+                    single_file_support = true,
+                })
             end
 
         end,
