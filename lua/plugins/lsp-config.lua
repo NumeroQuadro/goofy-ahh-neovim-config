@@ -170,7 +170,19 @@ return {
                 buf_set_keymap('n', ']d', vim.diagnostic.goto_next, { desc = "Next diagnostic" })
                 buf_set_keymap('n', 'K', vim.lsp.buf.hover, { desc = "Hover" })
                 buf_set_keymap({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, { desc = "Code action" })
-                buf_set_keymap('n', '<leader>e', vim.diagnostic.open_float, { desc = "Open float" })
+                buf_set_keymap('n', '<leader>e', function()
+                    local diags = vim.diagnostic.get(0, { lnum = vim.api.nvim_win_get_cursor(0)[1] - 1 })
+                    if diags and #diags > 0 then
+                        vim.diagnostic.open_float(nil, { scope = 'line', focus = false })
+                        return
+                    end
+                    local ok, builtin = pcall(require, 'telescope.builtin')
+                    if ok then
+                        builtin.diagnostics({ bufnr = 0, prompt_title = 'Current File Diagnostics' })
+                    else
+                        vim.diagnostic.setloclist({ open = true })
+                    end
+                end, { desc = "Diagnostics: float/peek", nowait = true })
             end
 
             -- Setup LSP servers that benefit from default capabilities/on_attach
@@ -198,6 +210,29 @@ return {
                     on_attach = on_attach,
                     root_dir = lspconfig.util.root_pattern("gradlew", "mvnw", ".git"),
                     single_file_support = true,
+                })
+            end
+
+            -- Go (gopls)
+            if lspconfig.gopls then
+                lspconfig.gopls.setup({
+                    capabilities = capabilities,
+                    on_attach = on_attach,
+                    flags = { debounce_text_changes = 150 },
+                    filetypes = { "go", "gomod", "gowork", "gotmpl" },
+                    root_dir = lspconfig.util.root_pattern("go.work", "go.mod", ".git"),
+                    settings = {
+                        gopls = {
+                            usePlaceholders = true,
+                            analyses = { unusedparams = true, shadow = true },
+                            codelenses = { test = true, tidy = true, upgrade_dependency = true },
+                            hints = {
+                                assignVariableTypes = true,
+                                parameterNames = true,
+                                rangeVariableTypes = true,
+                            },
+                        },
+                    },
                 })
             end
 
