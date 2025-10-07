@@ -15,6 +15,7 @@ return {
         end,
         group = format_sync_grp,
       })
+      -- Use unified LSP rename mapping (<leader>rn) from lsp-config on_attach
     end,
     event = {"CmdlineEnter"},
     ft = { "go", "gomod" },
