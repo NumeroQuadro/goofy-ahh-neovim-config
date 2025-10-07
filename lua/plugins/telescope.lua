@@ -1,21 +1,26 @@
 return {
     {
         'nvim-telescope/telescope.nvim',
-        dependencies = { 'nvim-lua/plenary.nvim', "nvim-telescope/telescope-ui-select.nvim", "folke/todo-comments.nvim", "nvim-telescope/telescope-file-browser.nvim" },
+        dependencies = { 'nvim-lua/plenary.nvim', "folke/todo-comments.nvim", "nvim-telescope/telescope-file-browser.nvim" },
         config = function()
             local telescope = require("telescope")
             local builtin = require("telescope.builtin")
             local actions = require("telescope.actions")
+
+            -- Render file paths relative to project root (cwd) in pickers
+            local function rel_path_display(_, path)
+                -- :~:. → home as ~, and relative to cwd; trim leading ./ if present
+                local p = vim.fn.fnamemodify(path, ":~:.")
+                return (p:gsub('^%./', ''))
+            end
 
             telescope.setup({
                 defaults = {
                     previewer = true,
                     previewer = true,
                     sorting_strategy = 'ascending',
-                    -- Show full, untruncated file paths everywhere (no smart/truncate)
-                    path_display = function(_, path)
-                        return path
-                    end,
+                    -- Show paths relative to cwd (project root)
+                    path_display = rel_path_display,
                     vimgrep_arguments = {
                         "rg",
                         "--color=never",
@@ -101,23 +106,17 @@ return {
                     lsp_references = {
                         previewer = true,
                         fname_width = 200,
-                        path_display = function(_, path)
-                            return path
-                        end,
+                        path_display = rel_path_display,
                         show_line = true,
                     },
                     lsp_definitions = {
                         fname_width = 200,
-                        path_display = function(_, path)
-                            return path
-                        end,
+                        path_display = rel_path_display,
                         show_line = true,
                     },
                     lsp_implementations = {
                         fname_width = 200,
-                        path_display = function(_, path)
-                            return path
-                        end,
+                        path_display = rel_path_display,
                         show_line = true,
                     },
                 },
@@ -230,6 +229,7 @@ return {
             vim.keymap.set('n', '<leader>ff', function()
                 builtin.live_grep({
                     additional_args = {
+                        -- regex (default) search with filters
                         "--glob", "!**/.git/**",
                         "--glob", "!**/*_mock*",
                         "--glob", "!*.pb",
@@ -266,6 +266,49 @@ return {
                     }
                 })
             end, { desc = "Live Grep (filtered)" })
+
+            -- Literal (fixed-string) grep: special characters don't need escaping
+            vim.keymap.set('n', '<leader>fF', function()
+                builtin.live_grep({
+                    prompt_title = "Literal Grep (-F)",
+                    additional_args = {
+                        "-F", -- treat the pattern as a literal string
+                        "--glob", "!**/.git/**",
+                        "--glob", "!**/*_mock*",
+                        "--glob", "!*.pb",
+                        "--glob", "!*.pb.go",
+                        "--glob", "!*.pb.scratch.go",
+                        "--glob", "!*.pb.gw.go",
+                        "--glob", "!*.pb.sensitivity.go",
+                        "--glob", "!*.log",
+                        "--glob", "!*.tmp",
+                        "--glob", "!*.bak",
+                        "--glob", "!*.swp",
+                        "--glob", "!*.swo",
+                        "--glob", "!*.min.js",
+                        "--glob", "!*.min.css",
+                        "--glob", "!*.lock",
+                        "--glob", "!*.zip",
+                        "--glob", "!*.tar.gz",
+                        "--glob", "!*.rar",
+                        "--glob", "!*.7z",
+                        "--glob", "!*.pdf",
+                        "--glob", "!*.png",
+                        "--glob", "!*.jpg",
+                        "--glob", "!*.jpeg",
+                        "--glob", "!*.gif",
+                        "--glob", "!*.svg",
+                        "--glob", "!*.ico",
+                        "--glob", "!*.pyc",
+                        "--glob", "!*.o",
+                        "--glob", "!*.so",
+                        "--glob", "!*.dll",
+                        "--glob", "!*.exe",
+                        "--glob", "!*.class",
+                        "--glob", "!*.jar"
+                    }
+                })
+            end, { desc = "Live Grep (literal, no regex)" })
         end
     }
 }

@@ -10,6 +10,8 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.scrolloff = 4
 vim.opt.termguicolors = true
+vim.o.timeout = true
+vim.o.timeoutlen = 300 -- make key-seq timeout snappy (default ~1000ms)
 vim.opt.cursorline = true
 vim.opt.signcolumn = "yes"
 vim.opt.showtabline = 2
@@ -174,6 +176,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR><Esc>", { silent = true, desc = "Clear search highlight" })
 
 vim.keymap.set("i", "jk", "<Esc>", { noremap = true, silent = true, desc = "Exit insert mode" })
 
@@ -483,33 +486,33 @@ vim.api.nvim_create_user_command("SqlFormatOnSaveToggleGlobal", function()
   end
 end, {})
 
-
--- Global fallbacks for LSP nav: prefer LSP via Telescope if attached; otherwise use Vim defaults
-local function has_lsp()
-  local clients = vim.lsp.get_clients({ bufnr = 0 })
-  return clients and next(clients) ~= nil
-end
-
+-- Fallback LSP keymaps
+-- these will do nothing if the lsp is not attached
+vim.keymap.set('n', '<leader>e', function()
+  vim.diagnostic.open_float(nil, { scope = 'line' })
+end, { desc = "Open diagnostics float" })
 vim.keymap.set('n', 'gd', function()
-  if has_lsp() then
-    require('telescope.builtin').lsp_definitions()
-  else
-    vim.cmd('normal! gd')
-  end
-end, { desc = 'Go to definition (LSP if available)' })
+  pcall(vim.lsp.buf.definition)
+end, { silent = true, desc = "LSP Definition" })
+
+vim.keymap.set('n', 'gT', function()
+  pcall(vim.lsp.buf.type_definition)
+end, { silent = true, desc = "LSP Type Definition" })
 
 vim.keymap.set('n', 'gi', function()
-  if has_lsp() then
-    require('telescope.builtin').lsp_implementations()
+  local ok, builtin = pcall(require, 'telescope.builtin')
+  if ok then
+    pcall(builtin.lsp_implementations)
   else
-    vim.cmd('normal! gi')
+    pcall(vim.lsp.buf.implementation)
   end
-end, { desc = 'Go to implementation (LSP if available)' })
+end, { silent = true, desc = "LSP Implementation" })
 
 vim.keymap.set('n', 'gr', function()
-  if has_lsp() then
-    require('telescope.builtin').lsp_references()
+  local ok, builtin = pcall(require, 'telescope.builtin')
+  if ok then
+    pcall(builtin.lsp_references)
   else
-    vim.cmd('normal! gr')
+    pcall(vim.lsp.buf.references)
   end
-end, { desc = 'Find references (LSP if available)' })
+end, { silent = true, desc = "LSP References" })
