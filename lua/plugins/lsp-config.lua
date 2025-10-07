@@ -32,8 +32,8 @@ return {
         "neovim/nvim-lspconfig",
         dependencies = { "nvim-telescope/telescope.nvim" },
         config = function()
-            
 
+            -- UI: signature help floating window style
             vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
                 vim.lsp.handlers.signature_help,
                 {
@@ -42,7 +42,13 @@ return {
                 }
             )
 
-            local lspconfig = require("lspconfig")
+            -- Root detection using core vim.fs (avoid lspconfig framework)
+            local function compute_root(patterns, buf)
+                local path = vim.api.nvim_buf_get_name(buf or 0)
+                local start_dir = (path ~= '' and vim.fs.dirname(path)) or (vim.uv and vim.uv.cwd()) or vim.loop.cwd()
+                local found = vim.fs.find(patterns, { upward = true, path = start_dir })[1]
+                return found and vim.fs.dirname(found) or start_dir
+            end
 
             -- Deduplicate LSP locations by uri + start position
             local function dedupe_locations(locations)
@@ -185,42 +191,28 @@ return {
                 end, { desc = "Diagnostics: float/peek", nowait = true })
             end
 
-            -- Setup LSP servers that benefit from default capabilities/on_attach
-            -- Kotlin
-            if lspconfig.kotlin_language_server then
-                lspconfig.kotlin_language_server.setup({
-                    capabilities = capabilities,
-                    on_attach = on_attach,
+            -- Define servers using core vim.lsp.start (no lspconfig framework)
+            local servers = {
+                kotlin_language_server = {
+                    cmd = { "kotlin-language-server" },
+                    filetypes = { "kotlin" },
+                    root_patterns = { "settings.gradle", "settings.gradle.kts", "build.gradle", "build.gradle.kts", ".git" },
                     settings = {
                         kotlin = {
-                            compiler = {
-                                jvm = {
-                                    target = "17",
-                                },
-                            },
+                            compiler = { jvm = { target = "17" } },
                         },
                     },
-                })
-            end
-
-            -- Java (Eclipse JDT Language Server)
-            if lspconfig.jdtls then
-                lspconfig.jdtls.setup({
-                    capabilities = capabilities,
-                    on_attach = on_attach,
-                    root_dir = lspconfig.util.root_pattern("gradlew", "mvnw", ".git"),
+                },
+                jdtls = {
+                    cmd = { "jdtls" },
+                    filetypes = { "java" },
+                    root_patterns = { "gradlew", "mvnw", ".git" },
                     single_file_support = true,
-                })
-            end
-
-            -- Go (gopls)
-            if lspconfig.gopls then
-                lspconfig.gopls.setup({
-                    capabilities = capabilities,
-                    on_attach = on_attach,
-                    flags = { debounce_text_changes = 150 },
+                },
+                gopls = {
+                    cmd = { "gopls" },
                     filetypes = { "go", "gomod", "gowork", "gotmpl" },
-                    root_dir = lspconfig.util.root_pattern("go.work", "go.mod", ".git"),
+                    root_patterns = { "go.work", "go.mod", ".git" },
                     settings = {
                         gopls = {
                             usePlaceholders = true,
@@ -233,6 +225,82 @@ return {
                             },
                         },
                     },
+                },
+                lua_ls = {
+                    cmd = { "lua-language-server" },
+                    filetypes = { "lua" },
+                    root_patterns = { ".luarc.json", ".luacheckrc", ".git" },
+                    settings = {
+                        Lua = {
+                            workspace = { checkThirdParty = false },
+                            telemetry = { enable = false },
+                            diagnostics = { globals = { "vim" } },
+                        },
+                    },
+                },
+                pyright = {
+                    cmd = { "pyright-langserver", "--stdio" },
+                    filetypes = { "python" },
+                    root_patterns = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
+                },
+                clangd = {
+                    cmd = { "clangd" },
+                    filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
+                    root_patterns = { "compile_commands.json", "CMakeLists.txt", ".git" },
+                },
+                bashls = {
+                    cmd = { "bash-language-server", "start" },
+                    filetypes = { "sh", "bash" },
+                    root_patterns = { ".git" },
+                },
+                jsonls = {
+                    cmd = { "vscode-json-language-server", "--stdio" },
+                    filetypes = { "json", "jsonc" },
+                    root_patterns = { ".git" },
+                },
+                yamlls = {
+                    cmd = { "yaml-language-server", "--stdio" },
+                    filetypes = { "yaml", "yml" },
+                    root_patterns = { ".git" },
+                },
+                cssls = {
+                    cmd = { "vscode-css-language-server", "--stdio" },
+                    filetypes = { "css", "scss", "less" },
+                    root_patterns = { ".git" },
+                },
+                html = {
+                    cmd = { "vscode-html-language-server", "--stdio" },
+                    filetypes = { "html" },
+                    root_patterns = { ".git" },
+                },
+                vimls = {
+                    cmd = { "vim-language-server", "--stdio" },
+                    filetypes = { "vim" },
+                    root_patterns = { ".git" },
+                },
+            }
+
+            local group = vim.api.nvim_create_augroup("UserLspAutoStart", { clear = true })
+            for name, cfg in pairs(servers) do
+                vim.api.nvim_create_autocmd("FileType", {
+                    group = group,
+                    pattern = cfg.filetypes or {},
+                    callback = function(args)
+                        local root_dir = compute_root(cfg.root_patterns or { ".git" }, args.buf)
+                        -- Avoid starting if a matching client is already attached
+                        local existing = vim.lsp.get_clients({ bufnr = args.buf, name = name })
+                        if existing and #existing > 0 then return end
+                        vim.lsp.start({
+                            name = name,
+                            cmd = cfg.cmd,
+                            root_dir = root_dir,
+                            capabilities = capabilities,
+                            on_attach = on_attach,
+                            settings = cfg.settings,
+                            single_file_support = cfg.single_file_support,
+                        })
+                    end,
+                    desc = string.format("Start LSP: %s", name),
                 })
             end
 
