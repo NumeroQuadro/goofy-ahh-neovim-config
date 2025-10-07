@@ -24,3 +24,6 @@ require("lazy").setup({
     notify = false,             -- Disable notifications when plugins are reloaded
   },
 })
+
+-- Core LSP bootstrap (uses vim.lsp.start, no lspconfig framework)
+pcall(require, "lsp-core")
