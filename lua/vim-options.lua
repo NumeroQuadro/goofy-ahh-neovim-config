@@ -183,7 +183,52 @@ vim.keymap.set("i", "jk", "<Esc>", { noremap = true, silent = true, desc = "Exit
 vim.keymap.set({ "n", "v" }, "H", "^", { desc = "Go to first non-whitespace character" })
 vim.keymap.set({ "n", "v" }, "L", "$", { desc = "Go to end of line" })
 
-vim.o.mouse = ""
+-- Mouse: enabled by default with a quick toggle
+-- This allows normal mouse usage in Neovim (resize/splits/cursor/visual select)
+-- and provides convenient commands to temporarily turn it off when you want
+-- to use the terminal's native selection behavior.
+vim.o.mouse = "a"
+
+local function set_mouse(enabled)
+  if enabled then
+    vim.o.mouse = "a"
+    vim.g.mouse_enabled = true
+    vim.notify("Mouse: enabled", vim.log.levels.INFO)
+  else
+    vim.o.mouse = ""
+    vim.g.mouse_enabled = false
+    vim.notify("Mouse: disabled (use terminal selection)", vim.log.levels.INFO)
+  end
+end
+
+-- User commands to control mouse behavior
+vim.api.nvim_create_user_command("MouseOn", function()
+  set_mouse(true)
+end, {})
+
+vim.api.nvim_create_user_command("MouseOff", function()
+  set_mouse(false)
+end, {})
+
+vim.api.nvim_create_user_command("MouseToggle", function()
+  set_mouse(vim.o.mouse == "")
+end, {})
+
+-- Optional: temporary disable for quick terminal-style selection (5s)
+vim.api.nvim_create_user_command("MouseOffTemp", function(opts)
+  local ms = tonumber(opts.args) or 5000
+  set_mouse(false)
+  vim.defer_fn(function()
+    -- Only re-enable if user hasn't manually re-enabled
+    if vim.o.mouse == "" then set_mouse(true) end
+  end, ms)
+  vim.notify("Mouse: disabled for " .. ms .. "ms", vim.log.levels.INFO)
+end, { nargs = "?" })
+
+-- Keymap: <leader>m toggles mouse on/off
+vim.keymap.set("n", "<leader>m", function()
+  set_mouse(vim.o.mouse == "")
+end, { desc = "Toggle mouse (on/off)" })
 
 
 
