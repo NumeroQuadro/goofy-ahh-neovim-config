@@ -14,6 +14,16 @@ end
 -- Prepend lazy.nvim to runtime path
 vim.opt.rtp:prepend(lazypath)
 
+-- Ensure common Homebrew paths are available for Neovim (e.g., im-select)
+do
+  local candidates = { "/opt/homebrew/bin", "/usr/local/bin" }
+  for _, p in ipairs(candidates) do
+    if vim.fn.isdirectory(p) == 1 and not string.find(vim.env.PATH or '', vim.pesc(p)) then
+      vim.env.PATH = p .. ":" .. (vim.env.PATH or '')
+    end
+  end
+end
+
 -- Load core Neovim options and keymaps from a separate file
 require("vim-options")
 

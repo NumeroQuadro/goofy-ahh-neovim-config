@@ -231,6 +231,57 @@ vim.keymap.set("n", "<leader>m", function()
 end, { desc = "Toggle mouse (on/off)" })
 
 
+-- When mouse is enabled, make scroll wheel move the cursor instead of scrolling the window.
+-- This mirrors cursor movement one would do with j/k (or gj/gk for wrapped lines).
+local function set_scroll_moves_cursor(enable)
+  local modes_nv = { "n", "v", "o" }
+  local function map(mode, lhs, rhs, desc)
+    vim.keymap.set(mode, lhs, rhs, { silent = true, noremap = true, desc = desc })
+  end
+  local function demap(mode, lhs)
+    pcall(vim.keymap.del, mode, lhs)
+  end
+  if enable then
+    -- Use visual-line motions for wrapped lines
+    map(modes_nv, '<ScrollWheelUp>', 'gk', 'Cursor up (wheel)')
+    map(modes_nv, '<ScrollWheelDown>', 'gj', 'Cursor down (wheel)')
+    map('i', '<ScrollWheelUp>', '<C-o>gk', 'Cursor up (wheel)')
+    map('i', '<ScrollWheelDown>', '<C-o>gj', 'Cursor down (wheel)')
+    -- Faster with Shift: move 5 screen lines
+    map(modes_nv, '<S-ScrollWheelUp>', '5gk', 'Cursor up x5 (wheel)')
+    map(modes_nv, '<S-ScrollWheelDown>', '5gj', 'Cursor down x5 (wheel)')
+    map('i', '<S-ScrollWheelUp>', '<C-o>5gk', 'Cursor up x5 (wheel)')
+    map('i', '<S-ScrollWheelDown>', '<C-o>5gj', 'Cursor down x5 (wheel)')
+    vim.g.scroll_moves_cursor = true
+  else
+    for _, m in ipairs({ modes_nv, 'i' }) do
+      demap(m, '<ScrollWheelUp>')
+      demap(m, '<ScrollWheelDown>')
+      demap(m, '<S-ScrollWheelUp>')
+      demap(m, '<S-ScrollWheelDown>')
+    end
+    vim.g.scroll_moves_cursor = false
+  end
+end
+
+-- Enable this behavior by default
+set_scroll_moves_cursor(true)
+
+-- Commands to control the behavior at runtime
+vim.api.nvim_create_user_command('ScrollCursorOn', function()
+  set_scroll_moves_cursor(true)
+  vim.notify('Scroll wheel moves cursor: enabled', vim.log.levels.INFO)
+end, {})
+vim.api.nvim_create_user_command('ScrollCursorOff', function()
+  set_scroll_moves_cursor(false)
+  vim.notify('Scroll wheel moves cursor: disabled', vim.log.levels.INFO)
+end, {})
+vim.api.nvim_create_user_command('ScrollCursorToggle', function()
+  set_scroll_moves_cursor(not vim.g.scroll_moves_cursor)
+  vim.notify('Scroll wheel moves cursor: ' .. ((vim.g.scroll_moves_cursor and 'enabled') or 'disabled'), vim.log.levels.INFO)
+end, {})
+
+
 
 -- Auto-reload files changed outside of Neovim
 vim.opt.autoread = true

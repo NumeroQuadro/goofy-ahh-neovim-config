@@ -6,9 +6,20 @@ return {
             local telescope = require("telescope")
             local builtin = require("telescope.builtin")
             local actions = require("telescope.actions")
+            local diag_prefix = require("util.diag_prefix")
+
+            -- Helper: normalize various entry types from pickers/extensions to a string path
+            local function norm_path(arg)
+                if type(arg) == 'string' then return arg end
+                if type(arg) == 'table' then
+                    return arg.path or arg.filename or arg.value or arg[1] or ''
+                end
+                return ''
+            end
 
             -- Render file paths relative to project root (cwd) in pickers
             local function rel_path_display(_, path)
+                path = norm_path(path)
                 -- :~:. → home as ~, and relative to cwd; trim leading ./ if present
                 local p = vim.fn.fnamemodify(path, ":~:.")
                 return (p:gsub('^%./', ''))
@@ -183,6 +194,12 @@ return {
                 })
             end, { desc = "Live Grep (literal)" })
 
+            -- Helper to render with diagnostics prefix (only for already-listed buffers)
+            local function with_diag_prefix(path)
+                local p = norm_path(path)
+                return (diag_prefix.prefix_for_path(p) or "") .. rel_path_display(nil, p)
+            end
+
             -- Floating file browser with preview at project root
             vim.keymap.set('n', '<leader>fe', function()
                 require('telescope').extensions.file_browser.file_browser({
@@ -192,6 +209,7 @@ return {
                     hidden = true,
                     grouped = true,
                     previewer = true,
+                    path_display = with_diag_prefix,
                     initial_mode = "normal",
                     layout_strategy = 'vertical',
                     layout_config = {
@@ -215,6 +233,7 @@ return {
                     hidden = true,
                     grouped = true,
                     previewer = true,
+                    path_display = with_diag_prefix,
                     initial_mode = "normal",
                     layout_strategy = 'vertical',
                     layout_config = {
