@@ -17,12 +17,13 @@ return {
                 return ''
             end
 
-            -- Render file paths relative to project root (cwd) in pickers
-            local function rel_path_display(_, path)
+            -- Render file paths as absolute (home as ~) in pickers
+            local function abs_path_display(_, path)
                 path = norm_path(path)
-                -- :~:. → home as ~, and relative to cwd; trim leading ./ if present
-                local p = vim.fn.fnamemodify(path, ":~:.")
-                return (p:gsub('^%./', ''))
+                -- :p = absolute; :~ = home as ~
+                local p = vim.fn.fnamemodify(path, ":p")
+                p = vim.fn.fnamemodify(p, ":~")
+                return p
             end
 
             telescope.setup({
@@ -30,8 +31,8 @@ return {
                     previewer = true,
                     previewer = true,
                     sorting_strategy = 'ascending',
-                    -- Show paths relative to cwd (project root)
-                    path_display = rel_path_display,
+                    -- Show full absolute paths (with ~ for home)
+                    path_display = abs_path_display,
                     vimgrep_arguments = {
                         "rg",
                         "--color=never",
@@ -117,17 +118,17 @@ return {
                     lsp_references = {
                         previewer = true,
                         fname_width = 200,
-                        path_display = rel_path_display,
+                        path_display = abs_path_display,
                         show_line = true,
                     },
                     lsp_definitions = {
                         fname_width = 200,
-                        path_display = rel_path_display,
+                        path_display = abs_path_display,
                         show_line = true,
                     },
                     lsp_implementations = {
                         fname_width = 200,
-                        path_display = rel_path_display,
+                        path_display = abs_path_display,
                         show_line = true,
                     },
                 },
@@ -197,19 +198,22 @@ return {
             -- Helper to render with diagnostics prefix (only for already-listed buffers)
             local function with_diag_prefix(path)
                 local p = norm_path(path)
-                return (diag_prefix.prefix_for_path(p) or "") .. rel_path_display(nil, p)
+                return (diag_prefix.prefix_for_path(p) or "") .. abs_path_display(nil, p)
             end
 
             -- Floating file browser with preview at project root
             vim.keymap.set('n', '<leader>fe', function()
                 require('telescope').extensions.file_browser.file_browser({
-                    path = vim.loop.cwd(),
                     cwd = vim.loop.cwd(),
                     respect_gitignore = false,
                     hidden = true,
                     grouped = true,
                     previewer = true,
-                    path_display = with_diag_prefix,
+                    path_display = function(_, path)
+                        -- diagnostics prefix + absolute path
+                        local p = norm_path(path)
+                        return (diag_prefix.prefix_for_path(p) or "") .. abs_path_display(nil, p)
+                    end,
                     initial_mode = "normal",
                     layout_strategy = 'vertical',
                     layout_config = {
@@ -226,14 +230,17 @@ return {
                 local fb = require('telescope').extensions.file_browser
                 local here = vim.fn.expand("%:p:h")
                 fb.file_browser({
-                    path = here,
                     cwd = here,
                     select_buffer = true,
                     respect_gitignore = false,
                     hidden = true,
                     grouped = true,
                     previewer = true,
-                    path_display = with_diag_prefix,
+                    path_display = function(_, path)
+                        -- diagnostics prefix + absolute path
+                        local p = norm_path(path)
+                        return (diag_prefix.prefix_for_path(p) or "") .. abs_path_display(nil, p)
+                    end,
                     initial_mode = "normal",
                     layout_strategy = 'vertical',
                     layout_config = {
