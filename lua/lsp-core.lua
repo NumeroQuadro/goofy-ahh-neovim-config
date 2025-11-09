@@ -111,23 +111,50 @@ local on_attach = function(client, bufnr)
     pcall(vim.lsp.codelens.refresh)
   end
   local goto_definition_smart = function()
-    local params = vim.lsp.util.make_position_params()
+    local params = vim.lsp.util.make_position_params(0, (client and client.offset_encoding) or 'utf-16')
     vim.lsp.buf_request(0, 'textDocument/definition', params, function(_, def)
-      local ok = jump_to_first_location_or_picker(def, 'Definitions')
-      if not ok then return end
+      if jump_to_first_location_or_picker(def, 'Definitions') then return end
+      vim.lsp.buf_request(0, 'textDocument/typeDefinition', params, function(_, tdef)
+        if jump_to_first_location_or_picker(tdef, 'Type Definitions') then return end
+        vim.lsp.buf.declaration()
+      end)
     end)
   end
   buf_set_keymap('n', 'gd', goto_definition_smart, { desc = 'LSP Definition (smart)' })
   buf_set_keymap('n', 'gT', function()
-    local params = vim.lsp.util.make_position_params()
+    local params = vim.lsp.util.make_position_params(0, (client and client.offset_encoding) or 'utf-16')
     vim.lsp.buf_request(0, 'textDocument/typeDefinition', params, function(_, tdef)
       jump_to_first_location_or_picker(tdef, 'Type Definitions')
     end)
   end, { desc = 'LSP Type Definition (deduped)' })
-  buf_set_keymap('n', 'gi', function()
-    local ok, builtin = pcall(require, 'telescope.builtin')
-    if ok then builtin.lsp_implementations() else vim.lsp.buf.implementation() end
-  end, { desc = 'LSP Implementation' })
+  local function goto_implementation_smart()
+    local ok_telescope, builtin = pcall(require, 'telescope.builtin')
+    if client and client.supports_method and client:supports_method('textDocument/implementation') then
+      if ok_telescope then builtin.lsp_implementations() else vim.lsp.buf.implementation() end
+      return
+    end
+    local ft = vim.bo[bufnr].filetype
+    if ft == 'kotlin' then
+      local sym = vim.fn.expand('<cword>')
+      local root_dir = compute_root({ 'settings.gradle', 'settings.gradle.kts', 'build.gradle', 'build.gradle.kts', '.git' }, bufnr)
+      if ok_telescope then
+        builtin.live_grep({
+          cwd = root_dir,
+          default_text = string.format('override\\s+(fun|val|var)\\s+%s\\b', vim.fn.escape(sym, '\\')),
+          prompt_title = 'Kotlin implementations (grep)'
+        })
+      else
+        -- Fallback to vimgrep across Kotlin sources
+        local pattern = '\\<override\\s\\+\\(fun\\|val\\|var\\)\\s\\+' .. sym .. '\\>'
+        pcall(vim.cmd, 'vimgrep /' .. pattern .. '/gj ' .. vim.fn.fnameescape(root_dir .. '/**/*.kt'))
+        pcall(vim.cmd, 'copen')
+      end
+      return
+    end
+    -- Generic fallback when server lacks implementation: show references
+    if ok_telescope then builtin.lsp_references() else vim.lsp.buf.references() end
+  end
+  buf_set_keymap('n', 'gi', goto_implementation_smart, { desc = 'LSP Implementation (smart)' })
   buf_set_keymap('n', 'gr', function()
     local ok, builtin = pcall(require, 'telescope.builtin')
     if ok then builtin.lsp_references() else vim.lsp.buf.references() end
@@ -234,7 +261,7 @@ local servers = {
   kotlin_language_server = {
     cmd = { "kotlin-language-server" },
     filetypes = { "kotlin" },
-    root_patterns = { "settings.gradle", "settings.gradle.kts", "build.gradle", "build.gradle.kts", ".git" },
+    root_patterns = { "settings.gradle", "settings.gradle.kts", "build.gradle", "build.gradle.kts", "gradlew", ".git" },
     settings = { kotlin = { compiler = { jvm = { target = "17" } } } },
   },
 }
@@ -263,4 +290,3 @@ for name, cfg in pairs(servers) do
     desc = string.format("Start LSP: %s", name),
   })
 end
-
