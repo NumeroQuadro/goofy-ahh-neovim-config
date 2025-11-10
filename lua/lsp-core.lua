@@ -158,11 +158,31 @@ end
 local servers = {
   gopls = {
     cmd = { "gopls" },
+    -- Constrain gopls memory usage and scanning scope
+    cmd_env = { GOMEMLIMIT = "2GiB" },
     filetypes = { "go", "gomod", "gowork", "gotmpl" },
     root_patterns = { "go.work", "go.mod", ".git" },
     settings = {
       gopls = {
+        -- Keep features useful, but avoid heavy background work
         usePlaceholders = true,
+        staticcheck = false,
+        completeUnimported = false,
+        completionBudget = "100ms",
+        matcher = "CaseSensitive",
+        memoryMode = "DegradeClosed",
+        expandWorkspaceToModule = true,
+        directoryFilters = {
+          "-**/node_modules",
+          "-**/.git",
+          "-**/vendor",
+          "-**/bazel-*",
+          "-**/build",
+          "-**/bin",
+          "-**/out",
+          "-**/target",
+          "-**/.cache",
+        },
         analyses = { unusedparams = true, shadow = true },
         codelenses = { test = true, tidy = true, upgrade_dependency = true },
         hints = { assignVariableTypes = true, parameterNames = true, rangeVariableTypes = true },
@@ -247,6 +267,14 @@ for name, cfg in pairs(servers) do
     pattern = cfg.filetypes or {},
     callback = function(args)
       local root_dir = compute_root(cfg.root_patterns or { ".git" }, args.buf)
+      -- For Go, avoid starting gopls unless within a module/workspace
+      if name == 'gopls' then
+        local has_go_mod = (vim.uv or vim.loop).fs_stat(root_dir .. "/go.mod") ~= nil
+        local has_go_work = (vim.uv or vim.loop).fs_stat(root_dir .. "/go.work") ~= nil
+        if not (has_go_mod or has_go_work) then
+          return
+        end
+      end
       -- Avoid starting if a matching client is already attached
       local existing = vim.lsp.get_clients({ bufnr = args.buf, name = name })
       if existing and #existing > 0 then return end
@@ -254,6 +282,7 @@ for name, cfg in pairs(servers) do
         name = name,
         cmd = cfg.cmd,
         root_dir = root_dir,
+        cmd_env = cfg.cmd_env,
         capabilities = capabilities,
         on_attach = on_attach,
         settings = cfg.settings,
@@ -263,4 +292,3 @@ for name, cfg in pairs(servers) do
     desc = string.format("Start LSP: %s", name),
   })
 end
-
