@@ -161,7 +161,8 @@ local servers = {
     -- Constrain gopls memory usage and scanning scope
     cmd_env = { GOMEMLIMIT = "2GiB" },
     filetypes = { "go", "gomod", "gowork", "gotmpl" },
-    root_patterns = { "go.work", "go.mod", ".git" },
+    -- Avoid using .git as root to prevent scanning huge monorepos
+    root_patterns = { "go.work", "go.mod" },
     settings = {
       gopls = {
         -- Keep features useful, but avoid heavy background work
@@ -170,18 +171,19 @@ local servers = {
         completeUnimported = false,
         completionBudget = "100ms",
         matcher = "CaseSensitive",
-        memoryMode = "DegradeClosed",
         expandWorkspaceToModule = true,
         directoryFilters = {
-          "-**/node_modules",
-          "-**/.git",
-          "-**/vendor",
-          "-**/bazel-*",
-          "-**/build",
-          "-**/bin",
-          "-**/out",
-          "-**/target",
-          "-**/.cache",
+          "-.git",
+          "-node_modules",
+          "-vendor",
+          "-bazel-bin",
+          "-bazel-out",
+          "-bazel-testlogs",
+          "-build",
+          "-bin",
+          "-out",
+          "-target",
+          "-.cache",
         },
         analyses = { unusedparams = true, shadow = true },
         codelenses = { test = true, tidy = true, upgrade_dependency = true },
