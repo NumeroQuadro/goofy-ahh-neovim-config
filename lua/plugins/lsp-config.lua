@@ -151,7 +151,10 @@ return {
                     vim.keymap.set(mode, lhs, rhs, opts)
                 end
                 if client:supports_method("textDocument/inlayHint") then
-                    vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+                    local name = vim.api.nvim_buf_get_name(bufnr)
+                    if name:sub(-3) == ".go" then
+                        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+                    end
                 end
 
                 if client:supports_method("textDocument/codeLens") then

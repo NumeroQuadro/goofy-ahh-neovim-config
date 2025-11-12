@@ -35,5 +35,8 @@ require("lazy").setup({
   },
 })
 
+-- Quiet noisy LSP popups from gopls (e.g., InlayHint metadata warnings)
+pcall(require, "lsp-noise")
+
 -- Core LSP bootstrap (uses vim.lsp.start, no lspconfig framework)
 pcall(require, "lsp-core")
