@@ -1,0 +1,35 @@
+PKG := ./...
+COVER_FILE := coverage.out
+COVER_THRESH ?= 60.0
+
+.PHONY: test cover cover.html cover.nvm cover.check
+
+test:
+	go test $(PKG)
+
+# Generate coverage profile
+cover:
+	go test $(PKG) -coverprofile=$(COVER_FILE)
+
+# Open HTML coverage report (fallback when Neovim coverage is unavailable)
+cover.html: cover
+	go tool cover -html=$(COVER_FILE)
+
+# Open Neovim and show inline coverage (requires go.nvim or vim-go)
+cover.nvm: cover
+	@# Detect if :GoCoverage command exists; if so, use it. Otherwise open HTML fallback.
+	@if nvim --headless "+silent! echo exists(':GoCoverage')" +q 2>/dev/null | grep -q "1"; then \
+		nvim -c "GoCoverage" . ; \
+	else \
+		echo "Neovim coverage plugin not found; opening HTML report..."; \
+		go tool cover -html=$(COVER_FILE); \
+	fi
+
+# Fail if coverage below threshold
+cover.check: cover
+	@total=$$(go tool cover -func=$(COVER_FILE) | awk '/total:/ {print $$3}' | tr -d '%'); \
+	ok=$$(awk -v t=$(COVER_THRESH) -v c=$$total 'BEGIN{print (c+0 >= t+0)?1:0}'); \
+	if [ $$ok -ne 1 ]; then \
+		echo "Coverage $$total% < threshold $(COVER_THRESH)%"; exit 1; \
+	else echo "Coverage $$total% ≥ $(COVER_THRESH)%"; fi
+
