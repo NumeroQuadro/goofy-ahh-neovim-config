@@ -25,3 +25,8 @@ Next steps (when returning)
 
 Notes
 - No langmap fallback is active (explicitly reverted). IME switching depends on im-select being present.
+
+Find & Replace
+- Project-wide UI: `<leader>sr` opens Spectre for search/replace across the repo.
+- Current word: `<leader>sw` searches the word under cursor across the project; visual mode uses selection.
+- File-only UI: `<leader>sf` opens Spectre scoped to current file.
