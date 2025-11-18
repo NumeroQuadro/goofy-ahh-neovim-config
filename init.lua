@@ -33,7 +33,12 @@ require("lazy").setup({
   change_detection = {
     notify = false,             -- Disable notifications when plugins are reloaded
   },
+  -- Disable LuaRocks support to silence warnings (no plugins require it)
+  rocks = { enabled = false },
 })
+
+-- Quiet noisy LSP popups from gopls (e.g., InlayHint metadata warnings)
+pcall(require, "lsp-noise")
 
 -- Core LSP bootstrap (uses vim.lsp.start, no lspconfig framework)
 pcall(require, "lsp-core")

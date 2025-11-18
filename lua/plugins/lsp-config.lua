@@ -151,7 +151,10 @@ return {
                     vim.keymap.set(mode, lhs, rhs, opts)
                 end
                 if client:supports_method("textDocument/inlayHint") then
-                    vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+                    local name = vim.api.nvim_buf_get_name(bufnr)
+                    if name:sub(-3) == ".go" then
+                        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+                    end
                 end
 
                 if client:supports_method("textDocument/codeLens") then
@@ -211,11 +214,31 @@ return {
                 },
                 gopls = {
                     cmd = { "gopls" },
+                    cmd_env = { GOMEMLIMIT = "2GiB" },
                     filetypes = { "go", "gomod", "gowork", "gotmpl" },
-                    root_patterns = { "go.work", "go.mod", ".git" },
+                    -- Avoid .git as root; scope to module/workspace files
+                    root_patterns = { "go.work", "go.mod" },
                     settings = {
                         gopls = {
                             usePlaceholders = true,
+                            staticcheck = false,
+                            completeUnimported = false,
+                            completionBudget = "100ms",
+                            matcher = "CaseSensitive",
+                            expandWorkspaceToModule = true,
+                            directoryFilters = {
+                                "-.git",
+                                "-node_modules",
+                                "-vendor",
+                                "-bazel-bin",
+                                "-bazel-out",
+                                "-bazel-testlogs",
+                                "-build",
+                                "-bin",
+                                "-out",
+                                "-target",
+                                "-.cache",
+                            },
                             analyses = { unusedparams = true, shadow = true },
                             codelenses = { test = true, tidy = true, upgrade_dependency = true },
                             hints = {
@@ -287,6 +310,13 @@ return {
                     pattern = cfg.filetypes or {},
                     callback = function(args)
                         local root_dir = compute_root(cfg.root_patterns or { ".git" }, args.buf)
+                        if name == 'gopls' then
+                            local has_go_mod = (vim.uv or vim.loop).fs_stat(root_dir .. "/go.mod") ~= nil
+                            local has_go_work = (vim.uv or vim.loop).fs_stat(root_dir .. "/go.work") ~= nil
+                            if not (has_go_mod or has_go_work) then
+                                return
+                            end
+                        end
                         -- Avoid starting if a matching client is already attached
                         local existing = vim.lsp.get_clients({ bufnr = args.buf, name = name })
                         if existing and #existing > 0 then return end
@@ -294,6 +324,7 @@ return {
                             name = name,
                             cmd = cfg.cmd,
                             root_dir = root_dir,
+                            cmd_env = cfg.cmd_env,
                             capabilities = capabilities,
                             on_attach = on_attach,
                             settings = cfg.settings,
