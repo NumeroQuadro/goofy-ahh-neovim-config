@@ -213,7 +213,7 @@ return {
                     single_file_support = true,
                 },
                 gopls = {
-                    cmd = { "gopls" },
+                    cmd = { "gopls", "-remote=auto" },
                     cmd_env = { GOMEMLIMIT = "2GiB" },
                     filetypes = { "go", "gomod", "gowork", "gotmpl" },
                     -- Avoid .git as root; scope to module/workspace files

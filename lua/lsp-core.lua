@@ -160,7 +160,7 @@ end
 -- Server definitions (no lspconfig)
 local servers = {
   gopls = {
-    cmd = { "gopls" },
+    cmd = { "gopls", "-remote=auto" },
     -- Constrain gopls memory usage and scanning scope
     cmd_env = { GOMEMLIMIT = "2GiB" },
     filetypes = { "go", "gomod", "gowork", "gotmpl" },
