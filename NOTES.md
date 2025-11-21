@@ -30,3 +30,9 @@ Find & Replace
 - Project-wide UI: `<leader>sr` opens Spectre for search/replace across the repo.
 - Current word: `<leader>sw` searches the word under cursor across the project; visual mode uses selection.
 - File-only UI: `<leader>sf` opens Spectre scoped to current file.
+
+Coverage Diff in Neovim
+- Generate profile: `go test ./... -coverprofile=coverage.out` or `make -f Makefile.go-cover cover`.
+- Load highlights: `:CoverageLoad` then `:CoverageShow` (or `<leader>cl` then `<leader>cs`).
+- Review only changes: `:DiffviewOpen origin/main...HEAD` and navigate changed files with coverage overlay visible.
+- Auto reload: saving `coverage.out` triggers `CoverageLoad | CoverageShow` automatically.

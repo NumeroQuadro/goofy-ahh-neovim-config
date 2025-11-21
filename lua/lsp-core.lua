@@ -162,7 +162,7 @@ local servers = {
   gopls = {
     cmd = { "gopls", "-remote=auto" },
     -- Constrain gopls memory usage and scanning scope
-    cmd_env = { GOMEMLIMIT = "2GiB" },
+    cmd_env = { GOMEMLIMIT = "3GiB" },
     filetypes = { "go", "gomod", "gowork", "gotmpl" },
     -- Avoid using .git as root to prevent scanning huge monorepos
     root_patterns = { "go.work", "go.mod" },
