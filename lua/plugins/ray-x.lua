@@ -4,7 +4,8 @@ return {
     dependencies = { "ray-x/guihua.lua", "nvim-treesitter/nvim-treesitter", "nvim-lua/plenary.nvim" },
     config = function()
       require("go").setup({
-        lsp_cfg = true,
+        -- Disable go.nvim's internal lspconfig setup; we use lua/lsp-core.lua
+        lsp_cfg = false,
         dap_debug = false,
         trouble = true,
       })
