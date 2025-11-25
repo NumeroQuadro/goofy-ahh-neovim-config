@@ -582,6 +582,45 @@ vim.api.nvim_create_user_command("SqlFormatOnSaveToggleGlobal", function()
   end
 end, {})
 
+-- Manual format when user types :w (Go only)
+-- This does not use BufWritePre, so programmatic/auto writes are unaffected.
+do
+  local function format_then_write()
+    local bufnr = vim.api.nvim_get_current_buf()
+    local ft = vim.bo[bufnr].filetype
+    if ft == 'go' then
+      -- Prefer LSP formatting if available
+      local has_fmt = false
+      for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+        if client.supports_method and client:supports_method('textDocument/formatting') then
+          has_fmt = true
+          break
+        end
+      end
+      if has_fmt then
+        pcall(vim.lsp.buf.format, { bufnr = bufnr, async = false, timeout_ms = 2000 })
+      else
+        -- Fallback to conform (if installed) or go.nvim commands
+        local ok_conform, conform = pcall(require, 'conform')
+        if ok_conform then
+          pcall(conform.format, { bufnr = bufnr, lsp_fallback = true, quiet = true })
+        else
+          -- Try go.nvim formatters if available
+          pcall(vim.cmd, 'silent! GoImports')
+          pcall(vim.cmd, 'silent! GoFmt')
+        end
+      end
+    end
+    vim.cmd('write')
+  end
+
+  -- Ex command used by the cnoreabbrev below
+  vim.api.nvim_create_user_command('WFormatWrite', format_then_write, { nargs = 0 })
+
+  -- Intercept exactly ":w" typed by the user (no args) and run formatter first
+  vim.cmd([[cnoreabbrev <expr> w (getcmdtype() == ':' && getcmdline() =~# '^\s*w\s*$') ? 'WFormatWrite' : 'w']])
+end
+
 -- Fallback LSP keymaps
 -- these will do nothing if the lsp is not attached
 vim.keymap.set('n', '<leader>e', function()
