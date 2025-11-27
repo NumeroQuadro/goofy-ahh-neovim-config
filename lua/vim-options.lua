@@ -582,6 +582,64 @@ vim.api.nvim_create_user_command("SqlFormatOnSaveToggleGlobal", function()
   end
 end, {})
 
+-- Manual format + organize imports when user types :w (Go only)
+-- Does not hook BufWritePre; only a plain, no-arg :w from the user triggers it.
+do
+  local function format_then_write()
+    local bufnr = vim.api.nvim_get_current_buf()
+    local ft = vim.bo[bufnr].filetype
+    if ft == 'go' then
+      -- 1) Organize imports via LSP code action
+      local function organize_imports(timeout_ms)
+        local params = vim.lsp.util.make_range_params()
+        params.context = { only = { 'source.organizeImports' } }
+        local results = vim.lsp.buf_request_sync(bufnr, 'textDocument/codeAction', params, timeout_ms or 1000)
+        if results then
+          for client_id, res in pairs(results) do
+            for _, action in pairs(res.result or {}) do
+              if action.edit then
+                local client = vim.lsp.get_client_by_id(client_id)
+                local enc = (client and client.offset_encoding) or 'utf-16'
+                pcall(vim.lsp.util.apply_workspace_edit, action.edit, enc)
+              end
+              if action.command then
+                pcall(vim.lsp.buf.execute_command, action.command)
+              end
+            end
+          end
+        end
+      end
+      pcall(organize_imports, 1500)
+
+      -- 2) Format buffer (prefer LSP, then conform, then go.nvim)
+      local has_fmt = false
+      for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+        if client.supports_method and client:supports_method('textDocument/formatting') then
+          has_fmt = true
+          break
+        end
+      end
+      if has_fmt then
+        pcall(vim.lsp.buf.format, { bufnr = bufnr, async = false, timeout_ms = 2000 })
+      else
+        local ok_conform, conform = pcall(require, 'conform')
+        if ok_conform then
+          pcall(conform.format, { bufnr = bufnr, lsp_fallback = true, quiet = true })
+        else
+          pcall(vim.cmd, 'silent! GoImports')
+          pcall(vim.cmd, 'silent! GoFmt')
+        end
+      end
+    end
+    vim.cmd('write')
+  end
+
+  vim.api.nvim_create_user_command('WFormatWrite', format_then_write, { nargs = 0 })
+
+  -- Intercept exactly ":w" typed by the user (no args)
+  vim.cmd([[cnoreabbrev <expr> w (getcmdtype() == ':' && getcmdline() =~# '^\s*w\s*$') ? 'WFormatWrite' : 'w']])
+end
+
 -- Fallback LSP keymaps
 -- these will do nothing if the lsp is not attached
 vim.keymap.set('n', '<leader>e', function()
