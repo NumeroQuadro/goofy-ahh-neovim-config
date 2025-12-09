@@ -18,17 +18,16 @@ return {
         highlight = { ui = "String", search = "IncSearch", replace = "DiffChange" },
         mapping = {
           -- Select entries by file or by line, then run replace only for selected
-          ["toggle_file"] = { map = "<CR>", cmd = require('spectre.actions').toggle_file, desc = "Toggle file selection" },
-          ["toggle_line"] = { map = "<Tab>", cmd = require('spectre.actions').toggle_line, desc = "Toggle line selection" },
-          ["run_replace"] = { map = "r", cmd = require('spectre.actions').run_replace, desc = "Apply to selected" },
-          ["run_current_replace"] = { map = "R", cmd = require('spectre.actions').run_current_replace, desc = "Apply current file" },
-          ["show_options"] = { map = "o", cmd = require('spectre.actions').show_options, desc = "Show options" },
-          ["enter_file"] = { map = "gf", cmd = require('spectre.actions').enter_file, desc = "Open file under cursor" },
-          ["send_to_qf"] = { map = "Q", cmd = require('spectre.actions').send_to_qf, desc = "Send results to quickfix" },
-          ["replace_cmd"] = { map = "c", cmd = require('spectre.actions').replace_cmd, desc = "Input replace (sed)" },
+          ["toggle_file"] = { map = "<CR>", cmd = "<cmd>lua require('spectre.actions').toggle_file()<CR>", desc = "Toggle file selection" },
+          ["toggle_line"] = { map = "<Tab>", cmd = "<cmd>lua require('spectre.actions').toggle_line()<CR>", desc = "Toggle line selection" },
+          ["run_replace"] = { map = "r", cmd = "<cmd>lua require('spectre.actions').run_replace()<CR>", desc = "Apply to selected" },
+          ["run_current_replace"] = { map = "R", cmd = "<cmd>lua require('spectre.actions').run_current_replace()<CR>", desc = "Apply current file" },
+          ["show_options"] = { map = "o", cmd = "<cmd>lua require('spectre.actions').show_options()<CR>", desc = "Show options" },
+          ["enter_file"] = { map = "gf", cmd = "<cmd>lua require('spectre.actions').enter_file()<CR>", desc = "Open file under cursor" },
+          ["send_to_qf"] = { map = "Q", cmd = "<cmd>lua require('spectre.actions').send_to_qf()<CR>", desc = "Send results to quickfix" },
+          ["replace_cmd"] = { map = "c", cmd = "<cmd>lua require('spectre.actions').replace_cmd()<CR>", desc = "Input replace (sed)" },
         },
       })
     end,
   },
 }
-
