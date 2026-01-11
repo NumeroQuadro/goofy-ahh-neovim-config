@@ -241,6 +241,8 @@ return {
                             },
                             analyses = { unusedparams = true, shadow = true },
                             codelenses = { test = true, tidy = true, upgrade_dependency = true },
+                            memoryMode = "DegradeClosed",
+                            diagnosticsDelay = "300ms",
                             hints = {
                                 assignVariableTypes = true,
                                 parameterNames = true,
