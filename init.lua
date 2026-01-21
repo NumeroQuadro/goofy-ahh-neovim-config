@@ -37,6 +37,12 @@ require("lazy").setup({
   rocks = { enabled = false },
 })
 
+-- Apply default colorscheme after plugins load
+if not vim.g.colorscheme or vim.g.colorscheme == "" then
+  vim.g.colorscheme = "gruvbox"
+end
+pcall(vim.cmd.colorscheme, vim.g.colorscheme)
+
 -- Quiet noisy LSP popups from gopls (e.g., InlayHint metadata warnings)
 pcall(require, "lsp-noise")
 
