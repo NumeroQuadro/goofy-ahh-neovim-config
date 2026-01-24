@@ -310,7 +310,7 @@ vim.keymap.set("n", "<leader>R", "<cmd>checktime<CR>", { desc = "Reload files ch
 
 -- Keymap to switch themes
 vim.keymap.set("n", "<leader>th", function()
-  local themes = { "gruvbox", "cyberpunk-neon", "black", "catppuccin", "oxocarbon", "everforest", "monochrome" }
+  local themes = { "gruvbox", "black", "catppuccin", "oxocarbon", "everforest", "monochrome" }
   vim.ui.select(themes, { prompt = "Select a theme" }, function(choice)
     if not choice then return end
     -- Set the global selector so theme plugin loaders can respect it
@@ -388,6 +388,20 @@ vim.keymap.set("n", "-", function()
   end
   open_netrw_dir(file_dir, { sidebar = false })
 end, { desc = "Explore current directory" })
+
+-- Yank to system clipboard
+vim.keymap.set({ "n", "v" }, "<leader>y", "\"+y", { desc = "Yank to clipboard" })
+
+-- Copy full path of current file to clipboard
+vim.keymap.set("n", "<leader>yp", function()
+  local path = vim.fn.expand("%:p")
+  if path == "" then
+    vim.notify("No file path to copy", vim.log.levels.WARN)
+    return
+  end
+  vim.fn.setreg("+", path)
+  vim.notify("Copied: " .. path, vim.log.levels.INFO)
+end, { desc = "Yank file path to clipboard" })
 
 -- Global file operations (work from anywhere)
 vim.keymap.set("n", "<leader>nf", function()
