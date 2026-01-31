@@ -1,27 +1,22 @@
-Neovim IME + Diagnostics — Working Notes
+Neovim Config — Notes
 
-Goal
-- Use any keyboard layout while coding:
-  - Auto‑switch to English in Normal/Visual/Operator modes so all mappings work (hjkl, gd/gi/gr, <leader>…)
-  - Restore the previous layout in Insert/Cmdline for natural typing
-- Bonus done earlier: show per‑file diagnostics in Telescope file browser (<leader>fe and "-")
+Scope
+- This repo is the active Neovim config loaded by `init.lua`.
+- Documentation focuses on config behavior, not helper tooling.
 
-What’s implemented
-- Plugin config: keaising/im-select.nvim (lua/plugins/im-select.lua)
-  - Switch to English on InsertLeave/CmdlineLeave, restore on InsertEnter/CmdlineEnter
-  - Helper commands: :IMSelectCurrent and :IMSelectSet <id>
-- PATH bootstrap in init.lua to include Homebrew bins (/opt/homebrew/bin or /usr/local/bin)
-- Diagnostics prefixes in Telescope file browser via lua/util/diag_prefix.lua
+Known mapping overlaps
+- `<leader>fe` and `-` are set for netrw in `lua/vim-options.lua` but are later overwritten by Telescope file_browser mappings in `lua/plugins/telescope.lua`.
+- `<leader>gb` is set for the Gruvbox background picker but is later overwritten by gitsigns blame in `lua/plugins/gitsigns.lua`.
+- `<leader>gs` is Telescope git status by default, but go.nvim remaps it to `:GoCoverage` in Go buffers.
 
-Current blocker
-- im-select binary not installed (brew tap daipeihust/tap; brew install im-select) failed due to outdated Xcode Command Line Tools.
+Formatting behavior
+- SQL format-on-save uses `conform.nvim` (`sql_formatter`). Toggle with `:SqlFormatOnSave*` commands.
+- Kotlin format-on-save uses `conform.nvim` (`ktlint`).
+- Go formatting is triggered when you type `:w` and prefers LSP formatting, then falls back to conform or go.nvim commands.
 
-Next steps (when returning)
-1) Update Command Line Tools (System Settings → Software Update or xcode-select --install)
-2) Install im-select: brew tap daipeihust/tap && brew install im-select
-3) Verify in Neovim: :echo executable('im-select') → 1
-4) Confirm layout ID: from terminal, run `im-select` when English layout is active; set default_im_select accordingly in lua/plugins/im-select.lua
-5) Test: Insert mode in Russian → <Esc> to Normal → :IMSelectCurrent should show English ID
+Diagnostics prefixes in Telescope
+- Telescope file_browser shows diagnostic counts only for already-open buffers (see `lua/util/diag_prefix.lua`).
 
-Notes
-- No langmap fallback is active (explicitly reverted). IME switching depends on im-select being present.
+LSP setup
+- LSP autostart is defined in both `lua/lsp-core.lua` and `lua/plugins/lsp-config.lua`. Both use `vim.lsp.start` and check for existing clients by name, so they do not double-attach, but the configuration is duplicated.
+- Mason ensures several servers are installed; only the servers defined in the LSP config files are actually started.

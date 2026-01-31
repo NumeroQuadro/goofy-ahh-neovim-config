@@ -185,6 +185,7 @@ return {
             vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = "Git status" })
             vim.keymap.set('n', '<leader>ft', "<cmd>Telescope todo-comments<cr>", { desc = "Find todos" })
             vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = "Find Buffers" })
+            vim.keymap.set('n', '<leader>fr', builtin.oldfiles, { desc = "Recent files" })
 
             -- Live grep with literal search (no regex needed)
             vim.keymap.set('n', '<leader>fF', function()
