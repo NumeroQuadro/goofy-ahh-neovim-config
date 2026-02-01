@@ -403,6 +403,22 @@ vim.keymap.set("n", "<leader>yp", function()
   vim.notify("Copied: " .. path, vim.log.levels.INFO)
 end, { desc = "Yank file path to clipboard" })
 
+-- Copy relative path (to :pwd) of current file to clipboard
+vim.keymap.set("n", "<leader>yr", function()
+  local path = vim.fn.expand("%:p")
+  if path == "" then
+    vim.notify("No file path to copy", vim.log.levels.WARN)
+    return
+  end
+  local rel = vim.fn.fnamemodify(path, ":.")
+  if rel == "" then
+    vim.notify("Could not compute relative path", vim.log.levels.WARN)
+    return
+  end
+  vim.fn.setreg("+", rel)
+  vim.notify("Copied: " .. rel, vim.log.levels.INFO)
+end, { desc = "Yank relative file path to clipboard" })
+
 -- Global file operations (work from anywhere)
 vim.keymap.set("n", "<leader>nf", function()
   local current_dir = vim.fn.expand('%:p:h')
