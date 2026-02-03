@@ -36,7 +36,7 @@ Keymaps (custom)
 - Files: `<leader>nf` new file, `<leader>nd` new directory, `<leader>rf` rename file, `<leader>df` delete file, `<leader>yp` copy full path, `<leader>yr` copy relative path, `<leader>y` yank to system clipboard.
 - Telescope: `<C-p>` find files, `<leader>fg` live grep, `<leader>ff` filtered grep, `<leader>fF` literal grep, `<leader>fb` buffers, `<leader>fr` recent files, `<leader>ft` todos, `<leader>fe` file browser at project root, `-` file browser at current file directory.
 - Diagnostics: `<leader>d` all, `<leader>de` errors, `<leader>dw` warnings, `<leader>df` current file, `<leader>e` float or current-file list.
-- LSP: `gd` definition, `gT` type definition, `gi` implementation, `gr` references, `K` hover, `<leader>rn` rename, `<leader>ca` code action, `[d` and `]d` prev and next diagnostic, `<C-k>` signature help in insert mode.
+- LSP: `gd` definition, `gT` type definition, `gi` implementation, `gr` references, `<C-g>d` definition in new tab, `<C-g>i` implementation in new tab, `<C-g>r` references in new tab, `K` hover, `<leader>rn` rename, `<leader>ca` code action, `[d` and `]d` prev and next diagnostic, `<C-k>` signature help in insert mode.
 - Git: `<leader>gb` blame line, `<leader>hr` reset hunk, `<leader>gd` Diffview open, `<leader>gq` Diffview close, `<leader>gh` file history, `<leader>gH` repo history, `<leader>gc` git commits, `<leader>gC` buffer commits, `<leader>gs` git status in non-Go buffers.
 - Go: `<leader>gs` GoCoverage and `<leader>gS` GoCoverageClear in Go buffers.
 - Replace: `<leader>sp` project replace, `<leader>sf` file replace, `<leader>sw` search word (normal or visual).

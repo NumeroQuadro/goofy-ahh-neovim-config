@@ -110,6 +110,57 @@ return {
                 end
             end
 
+            local function open_lsp_location_in_tab(location)
+                vim.cmd('tabnew')
+                open_lsp_location(location)
+            end
+
+            local function present_locations_in_tab(locations, title)
+                local ok, pickers = pcall(require, 'telescope.pickers')
+                if ok then
+                    local finders = require('telescope.finders')
+                    local conf = require('telescope.config').values
+                    local make_entry = require('telescope.make_entry')
+                    local actions = require('telescope.actions')
+                    local items = vim.lsp.util.locations_to_items(locations, 'utf-8')
+                    pickers.new({}, {
+                        prompt_title = title or 'LSP Results',
+                        finder = finders.new_table({
+                            results = items,
+                            entry_maker = make_entry.gen_from_quickfix(),
+                        }),
+                        sorter = conf.generic_sorter({}),
+                        previewer = conf.qflist_previewer({}),
+                        attach_mappings = function()
+                            actions.select_default:replace(actions.select_tab)
+                            return true
+                        end,
+                    }):find()
+                    return
+                end
+
+                local items = vim.lsp.util.locations_to_items(locations, 'utf-8')
+                local entries = {}
+                for i, item in ipairs(items) do
+                    local fname = vim.fn.fnamemodify(item.filename or '', ':~:.')
+                    local lnum = item.lnum or 0
+                    local col = item.col or 0
+                    local text = item.text or ''
+                    entries[i] = {
+                        label = string.format('%s:%d:%d: %s', fname, lnum, col, text),
+                        loc = locations[i],
+                    }
+                end
+                if vim.tbl_isempty(entries) then return end
+                vim.ui.select(entries, {
+                    prompt = title or 'LSP Results',
+                    format_item = function(entry) return entry.label end,
+                }, function(choice)
+                    if not choice then return end
+                    open_lsp_location_in_tab(choice.loc)
+                end)
+            end
+
             local function jump_to_first_location_or_picker(result, picker_name)
                 if not result or vim.tbl_isempty(result) then return false end
                 local locations = result
@@ -127,6 +178,20 @@ return {
                 return true
             end
 
+            local function jump_to_first_location_or_picker_tab(result, picker_name)
+                if not result or vim.tbl_isempty(result) then return false end
+                local locations = result
+                if result.result then locations = result.result end
+                if not locations or vim.tbl_isempty(locations) then return false end
+                locations = dedupe_locations(locations)
+                if #locations == 1 then
+                    open_lsp_location_in_tab(locations[1])
+                else
+                    present_locations_in_tab(locations, 'LSP ' .. (picker_name or 'Results (Tab)'))
+                end
+                return true
+            end
+
             local function goto_definition_smart()
                 local params = vim.lsp.util.make_position_params()
                 vim.lsp.buf_request(0, 'textDocument/definition', params, function(_, def)
@@ -136,6 +201,19 @@ return {
                         if jump_to_first_location_or_picker(tdef, 'lsp_type_definitions') then return end
                         -- Last resort: declaration
                         vim.lsp.buf.declaration()
+                    end)
+                end)
+            end
+
+            local function goto_definition_smart_tab()
+                local params = vim.lsp.util.make_position_params()
+                vim.lsp.buf_request(0, 'textDocument/definition', params, function(_, def)
+                    if jump_to_first_location_or_picker_tab(def, 'Definitions (Tab)') then return end
+                    vim.lsp.buf_request(0, 'textDocument/typeDefinition', params, function(_, tdef)
+                        if jump_to_first_location_or_picker_tab(tdef, 'Type Definitions (Tab)') then return end
+                        vim.lsp.buf_request(0, 'textDocument/declaration', params, function(_, decl)
+                            jump_to_first_location_or_picker_tab(decl, 'Declarations (Tab)')
+                        end)
                     end)
                 end)
             end
@@ -163,6 +241,7 @@ return {
 
                 local builtin = require('telescope.builtin')
                 buf_set_keymap('n', 'gd', goto_definition_smart, { desc = 'LSP Definition (smart)' })
+                buf_set_keymap('n', '<C-g>d', goto_definition_smart_tab, { desc = 'LSP Definition (tab)' })
                 buf_set_keymap('n', 'gT', function()
                     local params = vim.lsp.util.make_position_params()
                     vim.lsp.buf_request(0, 'textDocument/typeDefinition', params, function(_, tdef)
@@ -171,7 +250,20 @@ return {
                     end)
                 end, { desc = 'LSP Type Definition (deduped)' })
                 buf_set_keymap('n', 'gi', builtin.lsp_implementations, { desc = 'LSP Implementation (Telescope)' })
+                buf_set_keymap('n', '<C-g>i', function()
+                    local params = vim.lsp.util.make_position_params()
+                    vim.lsp.buf_request(0, 'textDocument/implementation', params, function(_, impl)
+                        jump_to_first_location_or_picker_tab(impl, 'Implementations (Tab)')
+                    end)
+                end, { desc = 'LSP Implementation (tab)' })
                 buf_set_keymap('n', 'gr', builtin.lsp_references, { desc = 'LSP References (Telescope)' })
+                buf_set_keymap('n', '<C-g>r', function()
+                    local params = vim.lsp.util.make_position_params()
+                    params.context = { includeDeclaration = true }
+                    vim.lsp.buf_request(0, 'textDocument/references', params, function(_, refs)
+                        jump_to_first_location_or_picker_tab(refs, 'References (Tab)')
+                    end)
+                end, { desc = 'LSP References (tab)' })
                 buf_set_keymap('i', '<C-k>', vim.lsp.buf.signature_help, { desc = "Signature help" })
                 buf_set_keymap('n', '<leader>rn', vim.lsp.buf.rename, { desc = "Rename symbol" })
                 buf_set_keymap('n', '<leader>ca', vim.lsp.buf.code_action, { desc = "Code action" })
