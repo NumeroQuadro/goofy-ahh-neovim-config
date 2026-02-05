@@ -179,7 +179,7 @@ return {
                 })
             end, { desc = "View current file diagnostics" })
             
-            vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = "Live grep" })
+            vim.keymap.set('n', '<leader>ff', builtin.live_grep, { desc = "Live grep" })
             vim.keymap.set('n', '<leader>gc', builtin.git_commits, { desc = "Git commits" })
             vim.keymap.set('n', '<leader>gC', builtin.git_bcommits, { desc = "Git buffer commits" })
             vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = "Git status" })
@@ -253,7 +253,7 @@ return {
                 })
             end, { desc = "File browser (current file dir)" })
 
-            vim.keymap.set('n', '<leader>ff', function()
+            vim.keymap.set('n', '<leader>fg', function()
                 builtin.live_grep({
                     additional_args = {
                         -- regex (default) search with filters
