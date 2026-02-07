@@ -14,6 +14,10 @@ Formatting behavior
 - Kotlin format-on-save uses `conform.nvim` (`ktlint`).
 - Go formatting is triggered when you type `:w` and prefers LSP formatting, then falls back to conform or go.nvim commands.
 
+Commit message template
+- For `gitcommit` buffers, the first line is auto-filled as `[[ISSUE-123: ]]` when the current branch contains an issue key (prefers `MYACC-<digits>`).
+- Existing non-empty commit messages are not overwritten (e.g. merge/rebase generated messages).
+
 Diagnostics prefixes in Telescope
 - Telescope file_browser shows diagnostic counts only for already-open buffers (see `lua/util/diag_prefix.lua`).
 

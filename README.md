@@ -20,7 +20,8 @@ Features
 - LSP autostart for Go, Lua, Python, C/C++, Bash, JSON, YAML, CSS, HTML, Vimscript, Java, and Kotlin.
 - Completion with nvim-cmp + LuaSnip, plus autopairs integration.
 - Search and navigation with Telescope and file_browser; Pounce for jump navigation.
-- Git integrations with gitsigns and Diffview, plus Telescope git pickers.
+- Git integrations with gitsigns, Diffview, and Neogit, plus Telescope git pickers.
+- Git commit message template auto-fill from branch issue keys (e.g. `release/MYACC-12345` -> `[[MYACC-12345: ]]`).
 - Formatting hooks for SQL and Kotlin, plus Go formatting on `:w`.
 - UI setup with theme switching, bufferline tabs, lualine statusline, and neoscroll.
 - Markdown preview auto-starts for markdown buffers.
@@ -37,7 +38,7 @@ Keymaps (custom)
 - Telescope: `<C-p>` find files, `<leader>ff` live grep, `<leader>fg` filtered grep, `<leader>fF` literal grep, `<leader>fb` buffers, `<leader>fr` recent files, `<leader>ft` todos, `<leader>fe` file browser at project root, `-` file browser at current file directory.
 - Diagnostics: `<leader>d` all, `<leader>de` errors, `<leader>dw` warnings, `<leader>df` current file, `<leader>e` float or current-file list.
 - LSP: `gd` definition, `gT` type definition, `gi` implementation, `gr` references, `<C-g>d` definition in new tab, `<C-g>i` implementation in new tab, `<C-g>r` references in new tab, `K` hover, `<leader>rn` rename, `<leader>ca` code action, `[d` and `]d` prev and next diagnostic, `<C-k>` signature help in insert mode.
-- Git: `<leader>gb` blame line, `<leader>hr` reset hunk, `<leader>gd` Diffview open, `<leader>gq` Diffview close, `<leader>gh` file history, `<leader>gH` repo history, `<leader>gc` git commits, `<leader>gC` buffer commits, `<leader>gs` git status in non-Go buffers.
+- Git: `<leader>gg` Neogit status, `<leader>gG` Neogit status in vsplit, `<leader>gb` blame line, `<leader>hr` reset hunk, `<leader>gd` Diffview open, `<leader>gq` Diffview close, `<leader>gh` file history, `<leader>gH` repo history, `<leader>gc` git commits, `<leader>gC` buffer commits, `<leader>gs` git status in non-Go buffers.
 - Go: `<leader>gs` GoCoverage and `<leader>gS` GoCoverageClear in Go buffers.
 - Replace: `<leader>sp` project replace, `<leader>sf` file replace, `<leader>sw` search word (normal or visual).
 - Coverage: `<leader>cl` load, `<leader>cs` show, `<leader>ch` hide, `<leader>cc` clear.
