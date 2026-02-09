@@ -119,7 +119,16 @@ return {
   },
   opts = {
     status = {
+      mode_padding = 6,
       mode_text = {
+        M = "MOD",
+        N = "NEW",
+        A = "ADD",
+        D = "DEL",
+        C = "COPY",
+        U = "UPD",
+        R = "REN",
+        T = "TYPE",
         DD = "CONFLICT",
         AU = "CONFLICT",
         UD = "CONFLICT",
@@ -147,8 +156,16 @@ return {
       vim.api.nvim_set_hl(0, "NeogitChangeDUunstaged", { link = "NeogitChangeUnmerged" })
       vim.api.nvim_set_hl(0, "NeogitChangeAAunstaged", { link = "NeogitChangeUnmerged" })
       vim.api.nvim_set_hl(0, "NeogitChangeUUunstaged", { link = "NeogitChangeUnmerged" })
-      vim.api.nvim_set_hl(0, "NeogitUnstagedchanges", { link = "Title" })
+      vim.api.nvim_set_hl(0, "NeogitChangeModified", { link = "DiffChange" })
+      vim.api.nvim_set_hl(0, "NeogitChangeAdded", { link = "DiffAdd" })
+      vim.api.nvim_set_hl(0, "NeogitChangeNewFile", { link = "DiffAdd" })
+      vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { link = "DiffDelete" })
+      vim.api.nvim_set_hl(0, "NeogitChangeRenamed", { link = "Identifier" })
+      vim.api.nvim_set_hl(0, "NeogitChangeCopied", { link = "Identifier" })
+      vim.api.nvim_set_hl(0, "NeogitUnstagedchanges", { link = "WarningMsg" })
+      vim.api.nvim_set_hl(0, "NeogitStagedchanges", { link = "Title" })
       vim.api.nvim_set_hl(0, "NeogitUnmergedchanges", { link = "ErrorMsg" })
+      vim.api.nvim_set_hl(0, "NeogitFilePath", { link = "Normal" })
     end
 
     apply_neogit_highlight_overrides()

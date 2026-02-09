@@ -24,6 +24,7 @@ Commit message template
 Git workflow
 - Neogit is the primary status UI (`<leader>gg` and `<leader>gG`) with Diffview and Telescope integrations enabled.
 - Neogit keeps unmerged files inside `Unstaged changes` by design; to make this clearer, conflict labels are rendered as `CONFLICT` and highlighted with error colors.
+- Neogit mode labels are compact (`MOD`, `NEW`, `ADD`, etc.) with wider mode-column padding and neutral `NeogitFilePath` coloring to improve filename readability in long lists.
 - Diffview uses enhanced diff highlighting for colorized side-by-side review.
 - Diffview merge mode is set to `diff3_mixed`: top `OURS | THEIRS` references with a bottom full-width editable `LOCAL` pane.
 - In Diffview merge mode, `<leader>cv` auto-hides the file panel for maximum width; use `<leader>b` to toggle it back when needed.
