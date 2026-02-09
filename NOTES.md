@@ -26,6 +26,8 @@ Git workflow
 - Diffview uses enhanced diff highlighting for colorized side-by-side review.
 - Merge-conflict gestures are `]x` and `[x` (next and previous), with `<leader>co`, `<leader>ct`, `<leader>cb`, and `<leader>c0` for ours, theirs, both, and none.
 - `<leader>cq` opens conflict locations in quickfix.
+- `<leader>cv` opens Diffview merge mode and `<leader>cV` closes it.
+- Conflict sections are highlighted as green for incoming and red for current changes (no yellow `DiffText` section).
 
 Diagnostics prefixes in Telescope
 - Telescope file_browser shows diagnostic counts only for already-open buffers (see `lua/util/diag_prefix.lua`).

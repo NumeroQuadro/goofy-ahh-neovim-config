@@ -20,6 +20,8 @@ return {
       { "<leader>cb", "<cmd>GitConflictChooseBoth<CR>", desc = "Conflict: Choose both" },
       { "<leader>c0", "<cmd>GitConflictChooseNone<CR>", desc = "Conflict: Choose none" },
       { "<leader>cq", "<cmd>GitConflictListQf<CR>", desc = "Conflict: List quickfix" },
+      { "<leader>cv", "<cmd>DiffviewOpen<CR>", desc = "Conflict: Open merge diff view" },
+      { "<leader>cV", "<cmd>DiffviewClose<CR>", desc = "Conflict: Close merge diff view" },
     },
     opts = {
       default_mappings = false,
@@ -27,7 +29,7 @@ return {
       list_opener = "copen",
       highlights = {
         incoming = "DiffAdd",
-        current = "DiffText",
+        current = "DiffDelete",
       },
     },
   },
