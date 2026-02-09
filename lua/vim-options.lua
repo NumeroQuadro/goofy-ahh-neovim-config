@@ -319,8 +319,8 @@ vim.keymap.set("n", "<leader>th", function()
   end)
 end, { desc = "Switch theme" })
 
--- Quick Gruvbox background shade picker
-vim.keymap.set("n", "<leader>gb", function()
+-- Quick Gruvbox background shade picker (git blame owns <leader>gb)
+vim.keymap.set("n", "<leader>tb", function()
   local shades = {
     "#000000", -- pure black
     "#0a0a0a",
@@ -360,8 +360,9 @@ vim.keymap.set("n", "<leader>ts", "<cmd>tab split<CR>", { desc = "Open current b
 -- Duplicate current tab's active window in a new tab (alias)
 vim.keymap.set("n", "<leader>tt", "<cmd>tab split<CR>", { desc = "Duplicate current tab" })
 
--- Open native netrw at project root and place cursor on current file
-vim.keymap.set("n", "<leader>fe", function()
+-- Open native netrw at project root and place cursor on current file.
+-- Telescope owns <leader>fe, so netrw uses <leader>fE.
+vim.keymap.set("n", "<leader>fE", function()
   local current_file_path = vim.fn.expand('%:p')
   local start_dir = vim.fn.expand('%:p:h')
   local root = find_project_root(start_dir)
@@ -369,7 +370,7 @@ vim.keymap.set("n", "<leader>fe", function()
   vim.t.netrw_initial_root = root
   vim.t.netrw_initial_file = current_file_path
   open_netrw_dir(root, { sidebar = false, focus_name = vim.fn.fnamemodify(current_file_path, ':t') })
-end, { desc = "Explore project root" })
+end, { desc = "Netrw: explore project root" })
 
 -- Open netrw as a left sidebar from current file's directory (manual split + edit)
 vim.keymap.set("n", "<leader>le", function()
@@ -380,14 +381,14 @@ vim.keymap.set("n", "<leader>le", function()
   open_netrw_dir(file_dir, { sidebar = true })
 end, { desc = "Left Explore (sidebar)" })
 
--- Quick open Explore with '-' like many terminals (edit directory in place)
-vim.keymap.set("n", "-", function()
+-- Keep '-' for Telescope file_browser; netrw keeps a secondary key.
+vim.keymap.set("n", "<leader>-", function()
   local file_dir = vim.fn.expand('%:p:h')
   if file_dir == "" or vim.fn.isdirectory(file_dir) == 0 then
     file_dir = vim.fn.getcwd()
   end
   open_netrw_dir(file_dir, { sidebar = false })
-end, { desc = "Explore current directory" })
+end, { desc = "Netrw: explore current directory" })
 
 -- Yank to system clipboard
 vim.keymap.set({ "n", "v" }, "<leader>y", "\"+y", { desc = "Yank to clipboard" })
@@ -612,44 +613,48 @@ vim.api.nvim_create_user_command("SqlFormatOnSaveToggleGlobal", function()
   end
 end, {})
 
--- Manual format when user types :w (Go only)
--- This does not use BufWritePre, so programmatic/auto writes are unaffected.
-do
-  local function format_then_write()
-    local bufnr = vim.api.nvim_get_current_buf()
-    local ft = vim.bo[bufnr].filetype
-    if ft == 'go' then
-      -- Prefer LSP formatting if available
-      local has_fmt = false
-      for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-        if client.supports_method and client:supports_method('textDocument/formatting') then
-          has_fmt = true
-          break
-        end
-      end
-      if has_fmt then
-        pcall(vim.lsp.buf.format, { bufnr = bufnr, async = false, timeout_ms = 2000 })
-      else
-        -- Fallback to conform (if installed) or go.nvim commands
-        local ok_conform, conform = pcall(require, 'conform')
-        if ok_conform then
-          pcall(conform.format, { bufnr = bufnr, lsp_fallback = true, quiet = true })
-        else
-          -- Try go.nvim formatters if available
-          pcall(vim.cmd, 'silent! GoImports')
-          pcall(vim.cmd, 'silent! GoFmt')
-        end
+-- Go: keep tabs (no spaces) even though global defaults use expandtab.
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("GoLocalIndent", { clear = true }),
+  pattern = { "go", "gomod", "gowork", "gosum", "gotmpl" },
+  callback = function(args)
+    local bo = vim.bo[args.buf]
+    bo.expandtab = false
+    bo.tabstop = 4
+    bo.softtabstop = 4
+    bo.shiftwidth = 4
+  end,
+})
+
+-- Go: format on write for normal save paths (:w, :wq, UI save).
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = vim.api.nvim_create_augroup("GoFormatOnSave", { clear = true }),
+  callback = function(args)
+    local ft = vim.bo[args.buf].filetype
+    if not (ft == "go" or ft == "gomod" or ft == "gowork" or ft == "gosum" or ft == "gotmpl") then
+      return
+    end
+
+    local has_lsp_formatter = false
+    for _, client in ipairs(vim.lsp.get_clients({ bufnr = args.buf })) do
+      if client.supports_method and client:supports_method("textDocument/formatting") then
+        has_lsp_formatter = true
+        break
       end
     end
-    vim.cmd('write')
-  end
 
-  -- Ex command used by the cnoreabbrev below
-  vim.api.nvim_create_user_command('WFormatWrite', format_then_write, { nargs = 0 })
+    if has_lsp_formatter then
+      pcall(vim.lsp.buf.format, { bufnr = args.buf, async = false, timeout_ms = 2000 })
+      return
+    end
 
-  -- Intercept exactly ":w" typed by the user (no args) and run formatter first
-  vim.cmd([[cnoreabbrev <expr> w (getcmdtype() == ':' && getcmdline() =~# '^\s*w\s*$') ? 'WFormatWrite' : 'w']])
-end
+    -- Keep a quiet fallback for setups using conform without a running Go LSP.
+    local ok_conform, conform = pcall(require, "conform")
+    if ok_conform then
+      pcall(conform.format, { bufnr = args.buf, async = false, lsp_fallback = true, quiet = true })
+    end
+  end,
+})
 
 -- Fallback LSP keymaps
 -- these will do nothing if the lsp is not attached

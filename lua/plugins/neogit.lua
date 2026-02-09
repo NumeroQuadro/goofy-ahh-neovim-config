@@ -120,6 +120,7 @@ return {
   opts = {
     integrations = {
       diffview = true,
+      telescope = true,
     },
   },
 }
