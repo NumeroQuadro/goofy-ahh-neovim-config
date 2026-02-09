@@ -25,6 +25,7 @@ Git workflow
 - Neogit is the primary status UI (`<leader>gg` and `<leader>gG`) with Diffview and Telescope integrations enabled.
 - Diffview uses enhanced diff highlighting for colorized side-by-side review.
 - Merge-conflict gestures are `]x` and `[x` (next and previous), with `<leader>co`, `<leader>ct`, `<leader>cb`, and `<leader>c0` for ours, theirs, both, and none.
+- `<leader>cm` opens a conflict picker menu (choose ours/theirs/both/none and auto-jump to next conflict).
 - `<leader>cq` opens conflict locations in quickfix.
 - `<leader>cv` opens Diffview merge mode and `<leader>cV` closes it.
 - Conflict sections are highlighted as green for incoming and red for current changes (no yellow `DiffText` section).
