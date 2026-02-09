@@ -359,6 +359,12 @@ for name, cfg in pairs(servers) do
     group = group,
     pattern = cfg.filetypes or {},
     callback = function(args)
+      local bufname = vim.api.nvim_buf_get_name(args.buf)
+      -- Diffview and other virtual buffers may expose non-file URI schemes.
+      -- LSP servers (notably gopls) expect file:// URIs for opened documents.
+      if bufname:match("^%a[%w+%.%-]*://") then
+        return
+      end
       local root_dir = compute_root(cfg.root_patterns or { ".git" }, args.buf)
       -- For Go, avoid starting gopls unless within a module/workspace
       if name == 'gopls' then

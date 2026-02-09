@@ -23,6 +23,7 @@ Commit message template
 
 Git workflow
 - Neogit is the primary status UI (`<leader>gg` and `<leader>gG`) with Diffview and Telescope integrations enabled.
+- Neogit keeps unmerged files inside `Unstaged changes` by design; to make this clearer, conflict labels are rendered as `CONFLICT` and highlighted with error colors.
 - Diffview uses enhanced diff highlighting for colorized side-by-side review.
 - Diffview merge mode is set to `diff3_mixed`: top `OURS | THEIRS` references with a bottom full-width editable `LOCAL` pane.
 - In Diffview merge mode, `<leader>cv` auto-hides the file panel for maximum width; use `<leader>b` to toggle it back when needed.
@@ -33,6 +34,7 @@ Git workflow
 - `<leader>cq` opens conflict locations in quickfix.
 - `<leader>cv` opens Diffview merge mode and `<leader>cV` closes it.
 - Conflict sections are highlighted as green for incoming and red for current changes (no yellow `DiffText` section).
+- LSP autostart and git-conflict overlays are skipped for non-file URI buffers (for example `diffview://...`) to avoid gopls URI parse errors and git-conflict extmark range errors in Diffview.
 
 Diagnostics prefixes in Telescope
 - Telescope file_browser shows diagnostic counts only for already-open buffers (see `lua/util/diag_prefix.lua`).

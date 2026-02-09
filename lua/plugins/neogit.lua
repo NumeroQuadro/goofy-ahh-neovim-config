@@ -118,9 +118,43 @@ return {
     },
   },
   opts = {
+    status = {
+      mode_text = {
+        DD = "CONFLICT",
+        AU = "CONFLICT",
+        UD = "CONFLICT",
+        UA = "CONFLICT",
+        DU = "CONFLICT",
+        AA = "CONFLICT",
+        UU = "CONFLICT",
+      },
+    },
     integrations = {
       diffview = true,
       telescope = true,
     },
   },
+  config = function(_, opts)
+    require("neogit").setup(opts)
+
+    local function apply_neogit_highlight_overrides()
+      -- Make conflict rows and section headings stand out from generic unstaged rows.
+      vim.api.nvim_set_hl(0, "NeogitChangeUnmerged", { link = "ErrorMsg" })
+      vim.api.nvim_set_hl(0, "NeogitChangeDDunstaged", { link = "NeogitChangeUnmerged" })
+      vim.api.nvim_set_hl(0, "NeogitChangeAUunstaged", { link = "NeogitChangeUnmerged" })
+      vim.api.nvim_set_hl(0, "NeogitChangeUDunstaged", { link = "NeogitChangeUnmerged" })
+      vim.api.nvim_set_hl(0, "NeogitChangeUAunstaged", { link = "NeogitChangeUnmerged" })
+      vim.api.nvim_set_hl(0, "NeogitChangeDUunstaged", { link = "NeogitChangeUnmerged" })
+      vim.api.nvim_set_hl(0, "NeogitChangeAAunstaged", { link = "NeogitChangeUnmerged" })
+      vim.api.nvim_set_hl(0, "NeogitChangeUUunstaged", { link = "NeogitChangeUnmerged" })
+      vim.api.nvim_set_hl(0, "NeogitUnstagedchanges", { link = "Title" })
+      vim.api.nvim_set_hl(0, "NeogitUnmergedchanges", { link = "ErrorMsg" })
+    end
+
+    apply_neogit_highlight_overrides()
+    vim.api.nvim_create_autocmd("ColorScheme", {
+      group = vim.api.nvim_create_augroup("custom-neogit-visuals", { clear = true }),
+      callback = apply_neogit_highlight_overrides,
+    })
+  end,
 }

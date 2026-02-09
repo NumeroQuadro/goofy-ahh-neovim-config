@@ -47,6 +47,21 @@ return {
       },
     },
     config = function(_, opts)
+      local ok_utils, gc_utils = pcall(require, "git-conflict.utils")
+      if ok_utils and gc_utils and not gc_utils._user_is_valid_buf_patched then
+        local original_is_valid_buf = gc_utils.is_valid_buf
+        gc_utils.is_valid_buf = function(bufnr)
+          bufnr = bufnr or 0
+          local name = vim.api.nvim_buf_get_name(bufnr)
+          -- Skip virtual URI buffers (e.g. diffview://...) that break extmark ranges.
+          if name:match("^%a[%w+%.%-]*://") then
+            return false
+          end
+          return original_is_valid_buf(bufnr)
+        end
+        gc_utils._user_is_valid_buf_patched = true
+      end
+
       require("git-conflict").setup(opts)
 
       local actions = {
