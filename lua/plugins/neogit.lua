@@ -38,6 +38,18 @@ return {
 
     local group = vim.api.nvim_create_augroup("custom-gitcommit-template", { clear = true })
 
+    local function extract_issue_key(branch)
+      return branch:match("(MYACC%-T%d+)")
+        or branch:match("(MYACC%-%d+)")
+        or branch:match("([A-Z][A-Z0-9]+%-T%d+)")
+        or branch:match("([A-Z][A-Z0-9]+%-%d+)")
+    end
+
+    local function has_issue_prefix(line)
+      return line:match("^%[[A-Z][A-Z0-9]+%-T%d+%]%s*$")
+        or line:match("^%[[A-Z][A-Z0-9]+%-%d+%]%s*$")
+    end
+
     vim.api.nvim_create_autocmd("FileType", {
       group = group,
       pattern = "gitcommit",
@@ -61,7 +73,7 @@ return {
 
         -- Avoid double insertion if the filetype autocmd runs more than once.
         local first_line = lines[1] or ""
-        if first_line:match("^%[%[[A-Z][A-Z0-9]+%-%d+:%s*%]%]$") then
+        if has_issue_prefix(first_line) then
           return
         end
 
@@ -81,12 +93,12 @@ return {
           return
         end
 
-        local issue_key = branch:match("(MYACC%-%d+)") or branch:match("([A-Z][A-Z0-9]+%-%d+)")
+        local issue_key = extract_issue_key(branch)
         if not issue_key then
           return
         end
 
-        local template = string.format("[[%s: ]]", issue_key)
+        local template = string.format("[%s] ", issue_key)
         if first_line:match("^%s*$") then
           vim.api.nvim_buf_set_lines(buf, 0, 1, false, { template })
         else
@@ -95,7 +107,7 @@ return {
 
         local win = vim.api.nvim_get_current_win()
         if vim.api.nvim_win_get_buf(win) == buf then
-          vim.api.nvim_win_set_cursor(win, { 1, math.max(0, #template - 2) })
+          vim.api.nvim_win_set_cursor(win, { 1, #template })
         end
       end,
     })

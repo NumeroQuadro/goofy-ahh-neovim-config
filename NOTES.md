@@ -9,6 +9,7 @@ Keymap ownership
 - Netrw explorer keys are intentionally secondary: `<leader>fE` (project root), `<leader>-` (current directory), and `<leader>le` (left sidebar) in `lua/vim-options.lua`.
 - `<leader>gb` is owned by gitsigns blame (`lua/plugins/gitsigns.lua`); Gruvbox background picker moved to `<leader>tb` in `lua/vim-options.lua`.
 - `<leader>gs` is global Git status (`lua/plugins/telescope.lua`); Go coverage uses buffer-local overrides in Go filetypes only (`lua/plugins/ray-x.lua`).
+- Horizontal mouse-wheel gestures are disabled globally; wrapped text should not trigger sideways viewport shifts.
 
 Formatting behavior
 - SQL format-on-save uses `conform.nvim` (`sql_formatter`). Toggle with `:SqlFormatOnSave*` commands.
@@ -18,7 +19,7 @@ Formatting behavior
 - Caveat: if no Go LSP is attached and no conform formatter is available for that buffer, the write still succeeds without formatting.
 
 Commit message template
-- For `gitcommit` buffers, the first line is auto-filled as `[[ISSUE-123: ]]` when the current branch contains an issue key (prefers `MYACC-<digits>`).
+- For `gitcommit` buffers, the first line is auto-filled as `[ISSUE-123] ` when the current branch contains an issue key (prefers `MYACC-T<digits>`, then `MYACC-<digits>`).
 - Existing non-empty commit messages are not overwritten (e.g. merge/rebase generated messages).
 
 Git workflow

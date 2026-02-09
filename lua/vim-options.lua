@@ -264,8 +264,24 @@ local function set_scroll_moves_cursor(enable)
   end
 end
 
+-- Disable horizontal wheel gestures globally (wrapped lines should not shift sideways).
+local function disable_horizontal_wheel_scroll()
+  local modes = { "n", "v", "o", "i" }
+  local keys = { "<ScrollWheelLeft>", "<ScrollWheelRight>", "<S-ScrollWheelLeft>", "<S-ScrollWheelRight>" }
+  for _, mode in ipairs(modes) do
+    for _, key in ipairs(keys) do
+      vim.keymap.set(mode, key, "<Nop>", {
+        silent = true,
+        noremap = true,
+        desc = "Disable horizontal wheel scroll",
+      })
+    end
+  end
+end
+
 -- Enable this behavior by default
 set_scroll_moves_cursor(true)
+disable_horizontal_wheel_scroll()
 
 -- Commands to control the behavior at runtime
 vim.api.nvim_create_user_command('ScrollCursorOn', function()

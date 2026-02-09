@@ -21,7 +21,7 @@ Features
 - Completion with nvim-cmp + LuaSnip, plus autopairs integration.
 - Search and navigation with Telescope and file_browser; Pounce for jump navigation.
 - Git integrations with gitsigns, Diffview, Neogit, and git-conflict, plus Telescope git pickers.
-- Git commit message template auto-fill from branch issue keys (e.g. `release/MYACC-12345` -> `[[MYACC-12345: ]]`).
+- Git commit message template auto-fill from branch issue keys (e.g. `release/MYACC-12345` -> `[MYACC-12345] `).
 - Formatting hooks for SQL and Kotlin, plus Go format-on-save for Go-related filetypes.
 - UI setup with theme switching, bufferline tabs, lualine statusline, and neoscroll.
 - Markdown preview auto-starts for markdown buffers.
@@ -52,6 +52,7 @@ Keymaps (custom)
 Commands and toggles
 - Mouse: `:MouseOn`, `:MouseOff`, `:MouseToggle`, `:MouseOffTemp [ms]`
 - Scroll wheel cursor mode: `:ScrollCursorOn`, `:ScrollCursorOff`, `:ScrollCursorToggle`
+- Horizontal mouse-wheel scrolling is disabled globally to avoid sideways movement on wrapped text.
 - SQL format toggles: `:SqlFormatOnSaveEnable`, `:SqlFormatOnSaveDisable`, `:SqlFormatOnSaveToggle`, and global variants.
 
 External tools and dependencies
