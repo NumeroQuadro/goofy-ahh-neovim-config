@@ -48,7 +48,7 @@ return {
                     layout = "diff2_horizontal",
                 },
                 merge_tool = {
-                    layout = "diff4_mixed",
+                    layout = "diff1_plain",
                 },
             },
             keymaps = {
@@ -75,4 +75,3 @@ return {
         })
     end,
 }
-
