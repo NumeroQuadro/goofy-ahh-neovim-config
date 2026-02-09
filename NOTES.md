@@ -24,8 +24,10 @@ Commit message template
 Git workflow
 - Neogit is the primary status UI (`<leader>gg` and `<leader>gG`) with Diffview and Telescope integrations enabled.
 - Diffview uses enhanced diff highlighting for colorized side-by-side review.
-- Diffview merge mode is set to `diff1_plain`: a single editable `LOCAL` pane with conflict markers (`<<<<<<<`, `|||||||`, `>>>>>>>`).
-- In Diffview merge mode, press `g<C-x>` to cycle layouts if you temporarily want multi-pane references.
+- Diffview merge mode is set to `diff3_mixed`: top `OURS | THEIRS` references with a bottom full-width editable `LOCAL` pane.
+- In Diffview merge mode, `<leader>cv` auto-hides the file panel for maximum width; use `<leader>b` to toggle it back when needed.
+- In Diffview merge mode, press `g<C-x>` to cycle layouts if you want single-pane marker editing (`diff1_plain`) or other merge layouts.
+- Diffview buffers use local-only compact gutters (`nonumber`, `norelativenumber`, `signcolumn=no`, `foldcolumn=0`) to improve visibility without changing global options.
 - Merge-conflict gestures are `]x` and `[x` (next and previous), with `<leader>co`, `<leader>ct`, `<leader>cb`, and `<leader>c0` for ours, theirs, both, and none.
 - `<leader>cm` opens a conflict picker menu (choose ours/theirs/both/none and auto-jump to next conflict).
 - `<leader>cq` opens conflict locations in quickfix.

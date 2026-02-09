@@ -41,15 +41,24 @@ return {
             enhanced_diff_hl = true,
             use_icons = true,
             file_panel = {
-                win_config = { position = "left", width = 35 },
+                win_config = { position = "left", width = 28 },
             },
             view = {
                 default = {
                     layout = "diff2_horizontal",
                 },
                 merge_tool = {
-                    layout = "diff1_plain",
+                    layout = "diff3_mixed",
                 },
+            },
+            hooks = {
+                diff_buf_read = function()
+                    -- Keep Diffview windows dense/readable without changing global options.
+                    vim.opt_local.number = false
+                    vim.opt_local.relativenumber = false
+                    vim.opt_local.signcolumn = "no"
+                    vim.opt_local.foldcolumn = "0"
+                end,
             },
             keymaps = {
                 view = {
@@ -58,6 +67,9 @@ return {
                     ["gf"] = actions.goto_file_edit,
                     ["<C-w><C-f>"] = actions.goto_file_split,
                     ["<C-w>gf"] = actions.goto_file_tab,
+                    ["<leader>b"] = actions.toggle_files,
+                    ["<leader>e"] = actions.focus_files,
+                    ["g<C-x>"] = actions.cycle_layout,
                 },
                 file_panel = {
                     ["j"] = actions.next_entry,
@@ -70,6 +82,9 @@ return {
                     ["R"] = actions.refresh_files,
                     ["<tab>"] = actions.select_next_entry,
                     ["<s-tab>"] = actions.select_prev_entry,
+                    ["<leader>b"] = actions.toggle_files,
+                    ["<leader>e"] = actions.focus_files,
+                    ["g<C-x>"] = actions.cycle_layout,
                 },
             },
         })

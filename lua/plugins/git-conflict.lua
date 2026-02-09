@@ -22,7 +22,19 @@ return {
       { "<leader>c0", "<cmd>GitConflictChooseNone<CR>", desc = "Conflict: Choose none" },
       { "<leader>cm", "<cmd>GitConflictPick<CR>", desc = "Conflict: Resolve picker" },
       { "<leader>cq", "<cmd>GitConflictListQf<CR>", desc = "Conflict: List quickfix" },
-      { "<leader>cv", "<cmd>DiffviewOpen<CR>", desc = "Conflict: Open merge diff view" },
+      {
+        "<leader>cv",
+        function()
+          vim.cmd.DiffviewOpen()
+          -- Maximize merge panes by collapsing the file panel on open.
+          vim.defer_fn(function()
+            pcall(function()
+              require("diffview").emit("toggle_files")
+            end)
+          end, 40)
+        end,
+        desc = "Conflict: Open merge diff view (focus panes)",
+      },
       { "<leader>cV", "<cmd>DiffviewClose<CR>", desc = "Conflict: Close merge diff view" },
     },
     opts = {
