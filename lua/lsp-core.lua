@@ -168,7 +168,9 @@ local on_attach = function(client, bufnr)
   end
   if client:supports_method("textDocument/inlayHint") then
     local name = vim.api.nvim_buf_get_name(bufnr)
-    if name:sub(-3) == ".go" then
+    -- gopls can repeatedly emit "no package metadata for file" on inlay hint
+    -- requests in some workspaces; keep Go LSP features, but skip auto-hints.
+    if client.name ~= "gopls" and name:sub(-3) == ".go" then
       pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
     end
   end

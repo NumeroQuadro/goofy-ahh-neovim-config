@@ -45,3 +45,4 @@ LSP setup
 - LSP autostart is defined only in `lua/lsp-core.lua` via `vim.lsp.start`.
 - `lua/plugins/lsp-config.lua` keeps Mason + mason-lspconfig `ensure_installed` only (install management, no client startup).
 - Mason ensures several servers are installed; only the servers defined in `lua/lsp-core.lua` are started.
+- `gopls` does not auto-enable inlay hints to avoid repeated `InlayHint` metadata errors in some Go workspaces.
