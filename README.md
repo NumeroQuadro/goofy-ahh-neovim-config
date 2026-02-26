@@ -11,7 +11,7 @@ Structure
 - `lua/lsp-noise.lua` filters noisy LSP popups (especially from gopls).
 - `lua/util/diag_prefix.lua` generates diagnostic prefixes for Telescope file_browser entries.
 - `lua/plugins/*.lua` contains lazy.nvim plugin specs and per-plugin configuration.
-- `colors/retro-terminal.lua` is a local colorscheme.
+- `colors/retro-terminal.lua` and `colors/cyberpaper.lua` are local colorschemes.
 - `lazy-lock.json` pins plugin versions.
 - `Makefile.go-cover` provides optional Go coverage helpers.
 
