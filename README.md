@@ -11,7 +11,7 @@ Structure
 - `lua/lsp-noise.lua` filters noisy LSP popups (especially from gopls).
 - `lua/util/diag_prefix.lua` generates diagnostic prefixes for Telescope file_browser entries.
 - `lua/plugins/*.lua` contains lazy.nvim plugin specs and per-plugin configuration.
-- `colors/retro-terminal.lua` is a local colorscheme.
+- `colors/*.lua` contains local colorschemes (including `retro-terminal`, `cyber-amber`, and `retro-1984`).
 - `lazy-lock.json` pins plugin versions.
 - `Makefile.go-cover` provides optional Go coverage helpers.
 
@@ -24,6 +24,7 @@ Features
 - Git commit message template auto-fill from branch issue keys (e.g. `release/MYACC-12345` -> `[MYACC-12345] `).
 - Formatting hooks for SQL and Kotlin, plus Go format-on-save for Go-related filetypes.
 - UI setup with theme switching, bufferline tabs, lualine statusline, and neoscroll.
+- Local custom themes include `retro-terminal` (light blue terminal), `cyber-amber` (dark amber fill style), and `retro-1984` (blue/green CRT payphone style).
 - Markdown preview auto-starts for markdown buffers.
 - Coverage overlays via nvim-coverage and `coverage.out`.
 
@@ -46,7 +47,7 @@ Keymaps (custom)
 - Replace: `<leader>sp` project replace, `<leader>sf` file replace, `<leader>sw` search word (normal or visual).
 - Coverage: `<leader>cl` load, `<leader>cs` show, `<leader>ch` hide, `<leader>cc` clear.
 - Pounce: `s` and `S` in normal or operator-pending, `<C-s>` in insert.
-- UI toggles: `<leader>m` mouse toggle, `<leader>th` theme picker, `<leader>tb` Gruvbox background picker.
+- UI toggles: `<leader>m` mouse toggle, `<leader>th` theme picker, `<leader>tb` Gruvbox background picker, `<leader>ta` Cyber Amber fill picker.
 - Reload: `<leader>R` reload files changed on disk.
 
 Commands and toggles
@@ -62,7 +63,7 @@ External tools and dependencies
 - Kotlin formatting expects `ktlint`.
 - Go buffers use tab indentation via filetype-local options (`noexpandtab`, width 4).
 - Go formatting runs on write (`:w`, `:wq`, UI save) for `go`, `gomod`, `gowork`, `gosum`, and `gotmpl`, preferring LSP and falling back to conform when available.
-- Go inlay hints are not auto-enabled for `gopls` (to avoid repeated `InlayHint` metadata errors in some workspaces).
+- `gopls` inlay hints are disabled on attach (capability turned off) to avoid repeated `InlayHint` metadata errors in some workspaces.
 
 Notes
 - `NOTES.md` documents keymap overlaps and other configuration caveats.

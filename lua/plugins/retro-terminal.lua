@@ -1,13 +1,18 @@
--- Retro Terminal colorscheme loader
--- Uses a dummy github repo pattern to satisfy lazy.nvim
+-- Local colorscheme loader for files in ./colors
 return {
   dir = vim.fn.stdpath("config") .. "/colors",  -- Local directory
-  name = "retro-terminal",
+  name = "local-colors",
   lazy = false,
   priority = 1000,
   config = function()
-    if vim.g.colorscheme == "retro-terminal" then
-      vim.cmd.colorscheme "retro-terminal"
+    local local_themes = {
+      ["retro-terminal"] = true,
+      ["cyber-amber"] = true,
+      ["retro-1984"] = true,
+    }
+
+    if local_themes[vim.g.colorscheme] then
+      vim.cmd.colorscheme(vim.g.colorscheme)
     end
   end,
 }

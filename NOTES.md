@@ -8,6 +8,8 @@ Keymap ownership
 - `<leader>fe` and `-` are owned by Telescope file_browser (`lua/plugins/telescope.lua`).
 - Netrw explorer keys are intentionally secondary: `<leader>fE` (project root), `<leader>-` (current directory), and `<leader>le` (left sidebar) in `lua/vim-options.lua`.
 - `<leader>gb` is owned by gitsigns blame (`lua/plugins/gitsigns.lua`); Gruvbox background picker moved to `<leader>tb` in `lua/vim-options.lua`.
+- `<leader>ta` is reserved for Cyber Amber fill color selection (`lua/vim-options.lua`) and only live-refreshes when `cyber-amber` is active.
+- `<leader>th` theme picker includes local custom themes: `retro-terminal`, `cyber-amber`, and `retro-1984`.
 - `<leader>gs` is global Git status (`lua/plugins/telescope.lua`); Go coverage uses buffer-local overrides in Go filetypes only (`lua/plugins/ray-x.lua`).
 - Horizontal mouse-wheel gestures are disabled globally; wrapped text should not trigger sideways viewport shifts.
 
@@ -45,4 +47,4 @@ LSP setup
 - LSP autostart is defined only in `lua/lsp-core.lua` via `vim.lsp.start`.
 - `lua/plugins/lsp-config.lua` keeps Mason + mason-lspconfig `ensure_installed` only (install management, no client startup).
 - Mason ensures several servers are installed; only the servers defined in `lua/lsp-core.lua` are started.
-- `gopls` does not auto-enable inlay hints to avoid repeated `InlayHint` metadata errors in some Go workspaces.
+- `gopls` disables inlay hints on attach (capability turned off) to avoid repeated `InlayHint` metadata errors in some Go workspaces.

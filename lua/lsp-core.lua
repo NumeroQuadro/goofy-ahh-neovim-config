@@ -166,13 +166,13 @@ local on_attach = function(client, bufnr)
     opts.buffer = bufnr
     vim.keymap.set(mode, lhs, rhs, opts)
   end
-  if client:supports_method("textDocument/inlayHint") then
-    local name = vim.api.nvim_buf_get_name(bufnr)
-    -- gopls can repeatedly emit "no package metadata for file" on inlay hint
-    -- requests in some workspaces; keep Go LSP features, but skip auto-hints.
-    if client.name ~= "gopls" and name:sub(-3) == ".go" then
-      pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
-    end
+  -- gopls can repeatedly emit "no package metadata for file" on inlay hint
+  -- requests in some workspaces (notably merge/conflict resolution flows).
+  -- Disable its inlay-hint capability entirely to avoid noisy request errors.
+  if client.name == "gopls" then
+    client.server_capabilities.inlayHintProvider = false
+  elseif client:supports_method("textDocument/inlayHint") then
+    pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
   end
   if client:supports_method("textDocument/codeLens") then
     pcall(vim.lsp.codelens.refresh)

@@ -1,5 +1,6 @@
 vim.g.colorscheme = "gruvbox" -- default theme
 vim.g.gruvbox_bg_color = "#101010" -- default: slightly grey background for gruvbox
+vim.g.cyber_amber_fill = vim.g.cyber_amber_fill or "#FF9D00" -- default accent/fill for cyber-amber
 
 vim.cmd("set ignorecase")
 vim.cmd("set expandtab")
@@ -326,7 +327,7 @@ vim.keymap.set("n", "<leader>R", "<cmd>checktime<CR>", { desc = "Reload files ch
 
 -- Keymap to switch themes
 vim.keymap.set("n", "<leader>th", function()
-  local themes = { "gruvbox", "black", "catppuccin", "oxocarbon", "everforest", "monochrome" }
+  local themes = { "gruvbox", "black", "catppuccin", "oxocarbon", "everforest", "monochrome", "retro-terminal", "cyber-amber", "retro-1984" }
   vim.ui.select(themes, { prompt = "Select a theme" }, function(choice)
     if not choice then return end
     -- Set the global selector so theme plugin loaders can respect it
@@ -356,6 +357,28 @@ vim.keymap.set("n", "<leader>tb", function()
     end
   end)
 end, { desc = "Gruvbox background shade" })
+
+-- Cyber Amber fill color picker (controls bright amber panel accents)
+vim.keymap.set("n", "<leader>ta", function()
+  local fills = {
+    "#FFE100", -- electric yellow
+    "#FFD200", -- vivid yellow
+    "#FF8800", -- deep amber
+    "#FF9D00", -- default
+    "#FFB300",
+    "#FFC21A",
+    "#E57E00", -- burnt orange
+    "#F6A623", -- warm amber
+  }
+  vim.ui.select(fills, { prompt = "Cyber Amber fill" }, function(choice)
+    if not choice then return end
+    vim.g.cyber_amber_fill = choice
+    if vim.g.colorscheme == "cyber-amber" then
+      -- Re-apply to force highlight update
+      vim.cmd("colorscheme cyber-amber")
+    end
+  end)
+end, { desc = "Cyber Amber fill color" })
 
 vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
 vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Move to lower window" })
