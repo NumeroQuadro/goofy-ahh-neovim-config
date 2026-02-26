@@ -39,9 +39,27 @@ return {
                 ['<C-e>'] = cmp.mapping.abort(),
                 ['<CR>'] = cmp.mapping.confirm({
                     behavior = cmp.ConfirmBehavior.Replace,
-                    select = true 
+                    select = true
                 }),
             }),
+            -- Keep fuzzy/non-prefix matching enabled so partial method names still surface.
+            matching = {
+                disallow_fuzzy_matching = false,
+                disallow_fullfuzzy_matching = false,
+                disallow_partial_fuzzy_matching = false,
+                disallow_partial_matching = false,
+                disallow_prefix_unmatching = false,
+            },
+            sorting = {
+                comparators = {
+                    cmp.config.compare.score,
+                    cmp.config.compare.recently_used,
+                    cmp.config.compare.locality,
+                    cmp.config.compare.kind,
+                    cmp.config.compare.length,
+                    cmp.config.compare.order,
+                },
+            },
             sources = cmp.config.sources({
                 { name = "nvim_lsp" },
                 { name = "luasnip" },

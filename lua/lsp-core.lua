@@ -263,7 +263,7 @@ local servers = {
         staticcheck = false,
         completeUnimported = false,
         completionBudget = "100ms",
-        matcher = "CaseSensitive",
+        matcher = "Fuzzy",
         expandWorkspaceToModule = true,
         directoryFilters = {
           "-.git",
