@@ -18,7 +18,7 @@ Structure
 Features
 - Plugin manager via lazy.nvim with a lockfile.
 - LSP autostart for Go, Lua, Python, C/C++, Bash, JSON, YAML, CSS, HTML, Vimscript, Java, and Kotlin.
-- Completion is configured for fuzzy/non-prefix matching in nvim-cmp; Go LSP (`gopls`) uses fuzzy matching for method/symbol suggestions.
+- Completion is configured for fuzzy/non-prefix matching in nvim-cmp (IDE-like filtering/ranking); Go LSP (`gopls`) uses fuzzy matching with a larger completion budget for method/symbol suggestions.
 - Completion with nvim-cmp + LuaSnip, plus autopairs integration.
 - Search and navigation with Telescope and file_browser; Pounce for jump navigation.
 - Git integrations with gitsigns, Diffview, Neogit, and git-conflict, plus Telescope git pickers.

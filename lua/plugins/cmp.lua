@@ -42,6 +42,10 @@ return {
                     select = true
                 }),
             }),
+            completion = {
+                completeopt = "menu,menuone,noinsert",
+                keyword_length = 1,
+            },
             -- Keep fuzzy/non-prefix matching enabled so partial method names still surface.
             matching = {
                 disallow_fuzzy_matching = false,
@@ -51,20 +55,24 @@ return {
                 disallow_prefix_unmatching = false,
             },
             sorting = {
+                priority_weight = 2,
                 comparators = {
+                    cmp.config.compare.offset,
+                    cmp.config.compare.exact,
                     cmp.config.compare.score,
                     cmp.config.compare.recently_used,
                     cmp.config.compare.locality,
                     cmp.config.compare.kind,
+                    cmp.config.compare.sort_text,
                     cmp.config.compare.length,
                     cmp.config.compare.order,
                 },
             },
             sources = cmp.config.sources({
-                { name = "nvim_lsp" },
+                { name = "nvim_lsp", keyword_length = 1, max_item_count = 200 },
                 { name = "luasnip" },
             }, {
-                { name = "buffer" },
+                { name = "buffer", keyword_length = 3 },
                 { name = "path" },
             }),
         })
