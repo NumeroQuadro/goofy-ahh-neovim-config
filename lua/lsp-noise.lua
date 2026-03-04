@@ -25,3 +25,18 @@ lsp.handlers["window/showMessage"] = function(_, result, ctx)
   vim.notify(name .. ": " .. msg, map_level(typ))
 end
 
+local default_inlay_hint_handler = lsp.handlers["textDocument/inlayHint"]
+lsp.handlers["textDocument/inlayHint"] = function(err, result, ctx, config)
+  local client = (ctx and ctx.client_id) and lsp.get_client_by_id(ctx.client_id) or nil
+  local msg = err and err.message or ""
+
+  if client and client.name == "gopls" then
+    if msg:find("getting file for InlayHint", 1, true) or msg:find("no package metadata for file", 1, true) then
+      return
+    end
+  end
+
+  if default_inlay_hint_handler then
+    return default_inlay_hint_handler(err, result, ctx, config)
+  end
+end

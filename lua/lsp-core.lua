@@ -166,6 +166,31 @@ local on_attach = function(client, bufnr)
     opts.buffer = bufnr
     vim.keymap.set(mode, lhs, rhs, opts)
   end
+  if client.name == "gopls" then
+    if not client._gopls_inlayhint_hard_disabled then
+      local orig_supports_method = client.supports_method
+      client.supports_method = function(self, method, ...)
+        if method == "textDocument/inlayHint" then
+          return false
+        end
+        return orig_supports_method(self, method, ...)
+      end
+
+      local orig_request = client.request
+      client.request = function(self, method, params, handler, request_bufnr)
+        if method == "textDocument/inlayHint" then
+          return false, nil
+        end
+        return orig_request(self, method, params, handler, request_bufnr)
+      end
+
+      client._gopls_inlayhint_hard_disabled = true
+    end
+    -- Even if inlay hints are enabled globally, keep them disabled for gopls.
+    -- Some workspaces trigger repeated "no package metadata for file" errors.
+    client.server_capabilities.inlayHintProvider = false
+    pcall(vim.lsp.inlay_hint.enable, false, { bufnr = bufnr })
+  end
   if client:supports_method("textDocument/inlayHint") then
     local name = vim.api.nvim_buf_get_name(bufnr)
     -- gopls can repeatedly emit "no package metadata for file" on inlay hint

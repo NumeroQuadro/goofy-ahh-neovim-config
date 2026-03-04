@@ -45,6 +45,6 @@ LSP setup
 - LSP autostart is defined only in `lua/lsp-core.lua` via `vim.lsp.start`.
 - `lua/plugins/lsp-config.lua` keeps Mason + mason-lspconfig `ensure_installed` only (install management, no client startup).
 - Mason ensures several servers are installed; only the servers defined in `lua/lsp-core.lua` are started.
-- `gopls` does not auto-enable inlay hints to avoid repeated `InlayHint` metadata errors in some Go workspaces.
+- `gopls` hard-disables inlay hints (capability + outgoing request interception), and `textDocument/inlayHint` handler errors about missing package metadata are suppressed to avoid repeated noise in affected workspaces.
 - `gopls` completion matcher is set to `Fuzzy` for more tolerant symbol/method suggestions, with completion budget increased to `400ms`.
 - `nvim-cmp` keeps fuzzy and non-prefix matching enabled (closer to IDE-style completion behavior), with LSP source priority and larger item caps to keep method results visible.

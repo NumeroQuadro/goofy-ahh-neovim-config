@@ -63,7 +63,7 @@ External tools and dependencies
 - Kotlin formatting expects `ktlint`.
 - Go buffers use tab indentation via filetype-local options (`noexpandtab`, width 4).
 - Go formatting runs on write (`:w`, `:wq`, UI save) for `go`, `gomod`, `gowork`, `gosum`, and `gotmpl`, preferring LSP and falling back to conform when available.
-- Go inlay hints are not auto-enabled for `gopls` (to avoid repeated `InlayHint` metadata errors in some workspaces).
+- Go inlay hints are hard-disabled for `gopls` (capability + request path), and noisy `InlayHint` metadata request errors are suppressed in LSP handlers.
 
 Notes
 - `NOTES.md` documents keymap overlaps and other configuration caveats.
