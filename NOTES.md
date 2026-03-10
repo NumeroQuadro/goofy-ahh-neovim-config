@@ -15,7 +15,8 @@ Formatting behavior
 - SQL format-on-save uses `conform.nvim` (`sql_formatter`). Toggle with `:SqlFormatOnSave*` commands.
 - Kotlin format-on-save uses `conform.nvim` (`ktlint`).
 - Go buffers use filetype-local tabs (`noexpandtab`, `tabstop=4`, `softtabstop=4`, `shiftwidth=4`) for `go`, `gomod`, `gowork`, `gosum`, and `gotmpl`.
-- Go formatting runs in `BufWritePre` for normal save paths (`:w`, `:wq`, and UI save), preferring an attached LSP formatter and otherwise trying conform quietly.
+- Go `.go` buffers run `source.organizeImports` in `BufWritePre` before formatting, so missing imports are added on normal save paths (`:w`, `:wq`, and UI save) when a Go LSP is attached.
+- Go formatting then runs in `BufWritePre`, preferring an attached LSP formatter and otherwise trying conform quietly (`goimports`/`gofmt` for `.go` when installed).
 - Caveat: if no Go LSP is attached and no conform formatter is available for that buffer, the write still succeeds without formatting.
 
 Commit message template

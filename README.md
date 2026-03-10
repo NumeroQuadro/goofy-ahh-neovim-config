@@ -62,7 +62,8 @@ External tools and dependencies
 - SQL formatting expects a `sql_formatter` binary.
 - Kotlin formatting expects `ktlint`.
 - Go buffers use tab indentation via filetype-local options (`noexpandtab`, width 4).
-- Go formatting runs on write (`:w`, `:wq`, UI save) for `go`, `gomod`, `gowork`, `gosum`, and `gotmpl`, preferring LSP and falling back to conform when available.
+- Go `.go` buffers run `organizeImports` before formatting on write (`:w`, `:wq`, UI save), so missing imports like `time` are added automatically when `gopls` is attached.
+- Go formatting runs on write (`:w`, `:wq`, UI save) for `go`, `gomod`, `gowork`, `gosum`, and `gotmpl`, preferring LSP and falling back to conform when available (`goimports`/`gofmt` for `.go` when installed).
 - Go inlay hints are hard-disabled for `gopls` (capability + request path), and noisy `InlayHint` metadata request errors are suppressed in LSP handlers.
 
 Notes

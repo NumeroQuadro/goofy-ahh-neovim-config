@@ -5,6 +5,7 @@ return {
     local conform = require("conform")
     conform.setup({
       formatters_by_ft = {
+        go = { "goimports", "gofmt" },
         sql = { "sql_formatter" },
         kotlin = { "ktlint" },
       },

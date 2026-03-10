@@ -642,6 +642,58 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+local function go_organize_imports(bufnr, timeout_ms)
+  local supports_code_action = false
+  for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+    if client.supports_method and client:supports_method("textDocument/codeAction") then
+      supports_code_action = true
+      break
+    end
+  end
+
+  if not supports_code_action then
+    return
+  end
+
+  local timeout = timeout_ms or 2000
+  local params = {
+    textDocument = vim.lsp.util.make_text_document_params(bufnr),
+    range = {
+      start = { line = 0, character = 0 },
+      ["end"] = { line = vim.api.nvim_buf_line_count(bufnr), character = 0 },
+    },
+    context = { only = { "source.organizeImports" } },
+  }
+
+  local results = vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, timeout)
+  if not results then
+    return
+  end
+
+  for client_id, res in pairs(results) do
+    local client = vim.lsp.get_client_by_id(client_id)
+    local actions = type(res.result) == "table" and res.result or {}
+    for _, action in ipairs(actions) do
+      if action.edit then
+        vim.lsp.util.apply_workspace_edit(action.edit)
+      end
+
+      local command = action.command
+      if command then
+        command = type(command) == "table" and command or action
+        local fn = (client and client.commands and client.commands[command.command]) or vim.lsp.commands[command.command]
+        if fn then
+          fn(command, { bufnr = bufnr, client_id = client_id })
+        elseif client and client.request_sync then
+          client.request_sync("workspace/executeCommand", command, timeout, bufnr)
+        else
+          vim.lsp.buf.execute_command(command)
+        end
+      end
+    end
+  end
+end
+
 -- Go: format on write for normal save paths (:w, :wq, UI save).
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = vim.api.nvim_create_augroup("GoFormatOnSave", { clear = true }),
@@ -652,11 +704,21 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     end
 
     local has_lsp_formatter = false
+    local has_lsp_code_action = false
     for _, client in ipairs(vim.lsp.get_clients({ bufnr = args.buf })) do
       if client.supports_method and client:supports_method("textDocument/formatting") then
         has_lsp_formatter = true
+      end
+      if client.supports_method and client:supports_method("textDocument/codeAction") then
+        has_lsp_code_action = true
+      end
+      if has_lsp_formatter and has_lsp_code_action then
         break
       end
+    end
+
+    if ft == "go" and has_lsp_code_action then
+      go_organize_imports(args.buf, 2000)
     end
 
     if has_lsp_formatter then
