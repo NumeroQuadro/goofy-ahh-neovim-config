@@ -10,6 +10,15 @@ Keymap ownership
 - `<leader>gb` is owned by gitsigns blame (`lua/plugins/gitsigns.lua`); Gruvbox background picker moved to `<leader>tb` in `lua/vim-options.lua`.
 - `<leader>gs` is global Git status (`lua/plugins/telescope.lua`); Go coverage uses buffer-local overrides in Go filetypes only (`lua/plugins/ray-x.lua`).
 - Horizontal mouse-wheel gestures are disabled globally; wrapped text should not trigger sideways viewport shifts.
+- `<leader>p` is owned by `img-clip.nvim` for pasting clipboard images into Markdown.
+- `<leader>P` is owned by `snacks.nvim` for floating image previews.
+
+Markdown images
+- In Markdown buffers, `<leader>p` saves the clipboard image into an `assets/` directory relative to the current file and inserts a relative image link.
+- The default filename is timestamp-based (`YYYY-MM-DD-HH-MM-SS`) and does not prompt for a name.
+- On macOS this depends on `pngpaste` being available in PATH.
+- Place the cursor on a Markdown image/link path and press `<leader>P` to show a small floating preview.
+- Image preview is configured for Kitty graphics floats, with inline document rendering disabled to keep text layout stable. ImageMagick (`magick`) is installed for non-PNG conversion.
 
 Formatting behavior
 - SQL format-on-save uses `conform.nvim` (`sql_formatter`). Toggle with `:SqlFormatOnSave*` commands.

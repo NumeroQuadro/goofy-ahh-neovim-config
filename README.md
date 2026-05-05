@@ -26,6 +26,8 @@ Features
 - Formatting hooks for SQL and Kotlin, plus Go format-on-save for Go-related filetypes.
 - UI setup with theme switching, bufferline tabs, lualine statusline, and neoscroll.
 - Markdown preview auto-starts for markdown buffers.
+- Markdown image paste saves clipboard screenshots into an `assets/` directory beside the current file.
+- Markdown image preview shows linked images in a small Kitty graphics floating window.
 - Coverage overlays via nvim-coverage and `coverage.out`.
 
 Keymaps (custom)
@@ -36,6 +38,8 @@ Keymaps (custom)
 - Tabs: `<leader>tn` new, `<leader>tx` close, `<leader>to` close others, `<leader>ts` split, `<leader>tt` duplicate, `]t` and `[t` next and previous.
 - Buffers: `]b` and `[b` next and previous, `<leader>bd` delete, `<leader>ba` delete all, `<leader>bo` delete others.
 - Files: `<leader>nf` new file, `<leader>nd` new directory, `<leader>rf` rename file, `<leader>df` delete file, `<leader>yp` copy full path, `<leader>yr` copy relative path, `<leader>y` yank to system clipboard.
+- Markdown images: `<leader>p` pastes a clipboard image into the current Markdown file.
+- Image preview: `<leader>P` previews the image under the cursor in a floating window.
 - Terminal: `<leader>ot` toggles a floating project terminal for the current tab and keeps the shell session alive while hidden.
 - Explorers: `<leader>fe` Telescope file browser at project root, `-` Telescope file browser at current file directory, `<leader>fE` netrw at project root, `<leader>-` netrw at current directory, `<leader>le` netrw left sidebar.
 - Diagnostics: `<leader>d` all, `<leader>de` errors, `<leader>dw` warnings, `<leader>df` current file, `<leader>e` float or current-file list.
@@ -60,6 +64,8 @@ Commands and toggles
 
 External tools and dependencies
 - ripgrep (`rg`) is used by Telescope for file search and grep.
+- macOS screenshot pasting in Markdown expects `pngpaste` for clipboard image extraction.
+- Image preview expects a terminal with Kitty graphics protocol support; Kitty is the primary supported terminal here. ImageMagick (`magick`) handles non-PNG image conversion.
 - LSP servers are started only from `lua/lsp-core.lua` via `vim.lsp.start`; Mason is used to install server binaries.
 - SQL formatting expects a `sql_formatter` binary.
 - Kotlin formatting expects `ktlint`.
