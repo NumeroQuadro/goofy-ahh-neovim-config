@@ -39,6 +39,11 @@ Git workflow
 - Conflict sections are highlighted as green for incoming and red for current changes (no yellow `DiffText` section).
 - LSP autostart and git-conflict overlays are skipped for non-file URI buffers (for example `diffview://...`) to avoid gopls URI parse errors and git-conflict extmark range errors in Diffview.
 
+Terminal behavior
+- `<leader>ot` and `:ProjectTerminalToggle` toggle a floating terminal for the current tab.
+- The terminal starts in the tab's current working directory the first time it is opened, then reuses the same hidden terminal buffer while the Neovim session stays alive.
+- Closing the floating window does not kill the shell; exiting the shell deletes the terminal buffer as usual.
+
 Diagnostics prefixes in Telescope
 - Telescope file_browser shows diagnostic counts only for already-open buffers (see `lua/util/diag_prefix.lua`).
 

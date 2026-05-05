@@ -36,6 +36,7 @@ Keymaps (custom)
 - Tabs: `<leader>tn` new, `<leader>tx` close, `<leader>to` close others, `<leader>ts` split, `<leader>tt` duplicate, `]t` and `[t` next and previous.
 - Buffers: `]b` and `[b` next and previous, `<leader>bd` delete, `<leader>ba` delete all, `<leader>bo` delete others.
 - Files: `<leader>nf` new file, `<leader>nd` new directory, `<leader>rf` rename file, `<leader>df` delete file, `<leader>yp` copy full path, `<leader>yr` copy relative path, `<leader>y` yank to system clipboard.
+- Terminal: `<leader>ot` toggles a floating project terminal for the current tab and keeps the shell session alive while hidden.
 - Explorers: `<leader>fe` Telescope file browser at project root, `-` Telescope file browser at current file directory, `<leader>fE` netrw at project root, `<leader>-` netrw at current directory, `<leader>le` netrw left sidebar.
 - Diagnostics: `<leader>d` all, `<leader>de` errors, `<leader>dw` warnings, `<leader>df` current file, `<leader>e` float or current-file list.
 - LSP: `gd` definition, `gT` type definition, `gi` implementation, `gr` references, `<C-g>d` definition in new tab, `<C-g>i` implementation in new tab, `<C-g>r` references in new tab, `K` hover, `<leader>rn` rename, `<leader>ca` code action, `[d` and `]d` prev and next diagnostic, `<C-k>` signature help in insert mode.
@@ -52,6 +53,7 @@ Keymaps (custom)
 
 Commands and toggles
 - Mouse: `:MouseOn`, `:MouseOff`, `:MouseToggle`, `:MouseOffTemp [ms]`
+- Terminal: `:ProjectTerminalToggle`
 - Scroll wheel cursor mode: `:ScrollCursorOn`, `:ScrollCursorOff`, `:ScrollCursorToggle`
 - Horizontal mouse-wheel scrolling is disabled globally to avoid sideways movement on wrapped text.
 - SQL format toggles: `:SqlFormatOnSaveEnable`, `:SqlFormatOnSaveDisable`, `:SqlFormatOnSaveToggle`, and global variants.

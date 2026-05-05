@@ -376,6 +376,111 @@ vim.keymap.set("n", "<leader>ts", "<cmd>tab split<CR>", { desc = "Open current b
 -- Duplicate current tab's active window in a new tab (alias)
 vim.keymap.set("n", "<leader>tt", "<cmd>tab split<CR>", { desc = "Duplicate current tab" })
 
+local function project_terminal_win_config()
+  local usable_columns = math.max(40, vim.o.columns - 4)
+  local usable_lines = math.max(12, vim.o.lines - vim.o.cmdheight - 2)
+  local width = math.min(usable_columns, math.max(80, math.floor(vim.o.columns * 0.9)))
+  local height = math.min(usable_lines, math.max(12, math.floor(usable_lines * 0.85)))
+  local row = math.max(1, math.floor((usable_lines - height) / 2))
+  local col = math.max(0, math.floor((vim.o.columns - width) / 2))
+
+  return {
+    relative = "editor",
+    style = "minimal",
+    border = "rounded",
+    title = " terminal ",
+    title_pos = "center",
+    row = row,
+    col = col,
+    width = width,
+    height = height,
+  }
+end
+
+local function project_terminal_is_visible()
+  local win = vim.t.project_terminal_win
+  return win
+    and vim.api.nvim_win_is_valid(win)
+    and vim.api.nvim_win_get_tabpage(win) == vim.api.nvim_get_current_tabpage()
+end
+
+local function project_terminal_root()
+  local cwd = vim.t.project_terminal_cwd
+  if cwd and cwd ~= "" and vim.fn.isdirectory(cwd) == 1 then
+    return cwd
+  end
+
+  cwd = vim.fn.getcwd()
+  vim.t.project_terminal_cwd = cwd
+  return cwd
+end
+
+local function open_project_terminal()
+  local buf = vim.t.project_terminal_buf
+  local has_terminal_buf = buf and vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == "terminal"
+
+  if not has_terminal_buf then
+    buf = vim.api.nvim_create_buf(false, true)
+    vim.bo[buf].bufhidden = "hide"
+    vim.bo[buf].buflisted = false
+    vim.t.project_terminal_buf = buf
+  end
+
+  local win = vim.api.nvim_open_win(buf, true, project_terminal_win_config())
+  vim.t.project_terminal_win = win
+
+  vim.wo[win].number = false
+  vim.wo[win].relativenumber = false
+  vim.wo[win].signcolumn = "no"
+  vim.wo[win].winfixbuf = true
+
+  if not has_terminal_buf then
+    local job = vim.fn.termopen(vim.o.shell, { cwd = project_terminal_root() })
+    if job <= 0 then
+      vim.notify("Failed to start project terminal", vim.log.levels.ERROR)
+      pcall(vim.api.nvim_win_close, win, true)
+      if vim.api.nvim_buf_is_valid(buf) then
+        pcall(vim.api.nvim_buf_delete, buf, { force = true })
+      end
+      vim.t.project_terminal_buf = nil
+      vim.t.project_terminal_win = nil
+      return
+    end
+  end
+
+  vim.cmd("startinsert")
+end
+
+local function toggle_project_terminal()
+  if project_terminal_is_visible() then
+    pcall(vim.api.nvim_win_close, vim.t.project_terminal_win, true)
+    vim.t.project_terminal_win = nil
+    return
+  end
+
+  open_project_terminal()
+end
+
+vim.api.nvim_create_user_command("ProjectTerminalToggle", function()
+  toggle_project_terminal()
+end, { desc = "Toggle the project terminal" })
+
+vim.keymap.set({ "n", "t" }, "<leader>ot", function()
+  if vim.api.nvim_get_mode().mode:sub(1, 1) == "t" then
+    vim.cmd("stopinsert")
+  end
+  toggle_project_terminal()
+end, { desc = "Toggle project terminal" })
+
+vim.api.nvim_create_autocmd({ "TabEnter", "VimResized" }, {
+  group = vim.api.nvim_create_augroup("project-terminal-layout", { clear = true }),
+  callback = function()
+    if project_terminal_is_visible() then
+      pcall(vim.api.nvim_win_set_config, vim.t.project_terminal_win, project_terminal_win_config())
+    end
+  end,
+})
+
 -- Open native netrw at project root and place cursor on current file.
 -- Telescope owns <leader>fe, so netrw uses <leader>fE.
 vim.keymap.set("n", "<leader>fE", function()
