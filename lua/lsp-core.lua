@@ -34,6 +34,16 @@ local function dedupe_locations(locations)
   return unique
 end
 
+local function normalize_lsp_locations(result)
+  if not result then return {} end
+  if result.result then result = result.result end
+  if vim.tbl_isempty(result) then return {} end
+  if result.uri or result.targetUri then
+    return { result }
+  end
+  return dedupe_locations(result)
+end
+
 -- Present a list of locations in Telescope if available, otherwise quickfix
 local function present_locations_with_telescope(locs, title)
   local ok, pickers = pcall(require, 'telescope.pickers')
@@ -75,6 +85,102 @@ end
 local function open_lsp_location_in_tab(location)
   vim.cmd('tabnew')
   open_lsp_location(location)
+end
+
+local function lsp_location_uri_range(location)
+  local uri = location.targetUri or location.uri
+  local range = location.targetSelectionRange or location.range or location.targetRange
+  return uri, range
+end
+
+local function close_lsp_preview(win)
+  if win and vim.api.nvim_win_is_valid(win) then
+    pcall(vim.api.nvim_win_close, win, true)
+  end
+end
+
+local function preview_lsp_location(location)
+  local uri, range = lsp_location_uri_range(location)
+  if not uri or not range or not range.start then
+    vim.notify('No previewable definition location', vim.log.levels.WARN)
+    return
+  end
+
+  local fname = vim.uri_to_fname(uri)
+  if fname == '' then
+    vim.notify('Cannot preview non-file LSP location', vim.log.levels.WARN)
+    return
+  end
+
+  local source_buf = vim.fn.bufnr(fname)
+  if source_buf == -1 then
+    source_buf = vim.uri_to_bufnr(uri)
+  end
+  if not vim.api.nvim_buf_is_loaded(source_buf) then
+    pcall(vim.fn.bufload, source_buf)
+  end
+  if not vim.api.nvim_buf_is_loaded(source_buf) then
+    vim.notify('Could not load definition preview', vim.log.levels.WARN)
+    return
+  end
+
+  local target_lnum = (range.start.line or 0) + 1
+  local total_lines = vim.api.nvim_buf_line_count(source_buf)
+  local context = 8
+  local start_lnum = math.max(1, target_lnum - context)
+  local end_lnum = math.min(total_lines, target_lnum + context)
+  local lines = vim.api.nvim_buf_get_lines(source_buf, start_lnum - 1, end_lnum, false)
+  if vim.tbl_isempty(lines) then
+    vim.notify('Definition preview is empty', vim.log.levels.WARN)
+    return
+  end
+
+  local preview_buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(preview_buf, 0, -1, false, lines)
+  vim.bo[preview_buf].bufhidden = 'wipe'
+  vim.bo[preview_buf].buftype = 'nofile'
+  vim.bo[preview_buf].modifiable = false
+  vim.bo[preview_buf].readonly = true
+  vim.bo[preview_buf].swapfile = false
+  vim.bo[preview_buf].filetype = vim.bo[source_buf].filetype
+
+  local max_width = math.max(40, vim.o.columns - 4)
+  local width = math.min(max_width, math.max(60, math.floor(vim.o.columns * 0.72)))
+  local height = math.min(#lines, math.max(6, vim.o.lines - vim.o.cmdheight - 6))
+  local row = math.max(1, math.floor((vim.o.lines - height) / 2) - 1)
+  local col = math.max(0, math.floor((vim.o.columns - width) / 2))
+  local title = string.format(' %s:%d ', vim.fn.fnamemodify(fname, ':~:.'), target_lnum)
+
+  local win = vim.api.nvim_open_win(preview_buf, true, {
+    relative = 'editor',
+    style = 'minimal',
+    border = 'rounded',
+    title = title,
+    title_pos = 'center',
+    row = row,
+    col = col,
+    width = width,
+    height = height,
+  })
+
+  vim.wo[win].cursorline = true
+  vim.wo[win].number = false
+  vim.wo[win].relativenumber = false
+  vim.wo[win].signcolumn = 'no'
+  vim.wo[win].wrap = false
+  vim.wo[win].winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:Visual'
+  pcall(vim.api.nvim_win_set_cursor, win, { target_lnum - start_lnum + 1, range.start.character or 0 })
+
+  vim.keymap.set('n', 'q', function()
+    close_lsp_preview(win)
+  end, { buffer = preview_buf, silent = true, nowait = true, desc = 'Close definition preview' })
+  vim.keymap.set('n', '<Esc>', function()
+    close_lsp_preview(win)
+  end, { buffer = preview_buf, silent = true, nowait = true, desc = 'Close definition preview' })
+  vim.keymap.set('n', '<CR>', function()
+    close_lsp_preview(win)
+    open_lsp_location(location)
+  end, { buffer = preview_buf, silent = true, nowait = true, desc = 'Open definition' })
 end
 
 local function present_locations_in_tab(locs, title)
@@ -121,11 +227,8 @@ local function present_locations_in_tab(locs, title)
 end
 
 local function jump_to_first_location_or_picker(result, picker_name)
-  if not result or vim.tbl_isempty(result) then return false end
-  local locations = result
-  if result.result then locations = result.result end
-  if not locations or vim.tbl_isempty(locations) then return false end
-  locations = dedupe_locations(locations)
+  local locations = normalize_lsp_locations(result)
+  if vim.tbl_isempty(locations) then return false end
   if #locations == 1 then
     open_lsp_location(locations[1])
   else
@@ -135,11 +238,8 @@ local function jump_to_first_location_or_picker(result, picker_name)
 end
 
 local function jump_to_first_location_or_picker_tab(result, picker_name)
-  if not result or vim.tbl_isempty(result) then return false end
-  local locations = result
-  if result.result then locations = result.result end
-  if not locations or vim.tbl_isempty(locations) then return false end
-  locations = dedupe_locations(locations)
+  local locations = normalize_lsp_locations(result)
+  if vim.tbl_isempty(locations) then return false end
   if #locations == 1 then
     open_lsp_location_in_tab(locations[1])
   else
@@ -223,6 +323,21 @@ local on_attach = function(client, bufnr)
   end
   buf_set_keymap('n', 'gd', goto_definition_smart, { desc = 'LSP Definition (smart)' })
   buf_set_keymap('n', '<C-g>d', goto_definition_smart_tab, { desc = 'LSP Definition (tab)' })
+  buf_set_keymap('n', '<leader>lp', function()
+    local params = vim.lsp.util.make_position_params()
+    vim.lsp.buf_request(0, 'textDocument/definition', params, function(err, def)
+      if err then
+        vim.notify('Definition preview failed: ' .. (err.message or tostring(err)), vim.log.levels.WARN)
+        return
+      end
+      local locations = normalize_lsp_locations(def)
+      if vim.tbl_isempty(locations) then
+        vim.notify('No definition found to preview', vim.log.levels.INFO)
+        return
+      end
+      preview_lsp_location(locations[1])
+    end)
+  end, { desc = 'LSP Peek Definition' })
   buf_set_keymap('n', 'gT', function()
     local params = vim.lsp.util.make_position_params()
     vim.lsp.buf_request(0, 'textDocument/typeDefinition', params, function(_, tdef)

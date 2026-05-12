@@ -63,3 +63,4 @@ LSP setup
 - `gopls` hard-disables inlay hints (capability + outgoing request interception), and `textDocument/inlayHint` handler errors about missing package metadata are suppressed to avoid repeated noise in affected workspaces.
 - `gopls` completion matcher is set to `Fuzzy` for more tolerant symbol/method suggestions, with completion budget increased to `400ms`.
 - `nvim-cmp` keeps fuzzy and non-prefix matching enabled (closer to IDE-style completion behavior), with LSP source priority and larger item caps to keep method results visible.
+- LSP definition peeking uses `<leader>lp` to show the first definition location in a floating preview without moving the original cursor; press `<CR>` inside the float to jump there.
