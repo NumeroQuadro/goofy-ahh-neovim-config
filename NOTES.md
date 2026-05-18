@@ -53,6 +53,11 @@ Terminal behavior
 - The terminal starts in the tab's current working directory the first time it is opened, then reuses the same hidden terminal buffer while the Neovim session stays alive.
 - Closing the floating window does not kill the shell; exiting the shell deletes the terminal buffer as usual.
 
+Keyboard layout indicator
+- Lualine shows the current macOS input source as `KB: EN`, `KB: RU`, or a short fallback label when `im-select` reports another layout.
+- The indicator refreshes on focus/mode changes and once per second, so it remains visible and reasonably current while Neovim is fullscreen.
+- Known English layouts (`ABC`, `US`, `British`, `Dvorak`, `Colemak`) map to `EN`; known Russian layouts (`Russian`, `RussianWin`) map to `RU`.
+
 Diagnostics prefixes in Telescope
 - Telescope file_browser shows diagnostic counts only for already-open buffers (see `lua/util/diag_prefix.lua`).
 

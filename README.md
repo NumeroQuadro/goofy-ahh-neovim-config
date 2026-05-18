@@ -25,6 +25,7 @@ Features
 - Git commit message template auto-fill from branch issue keys (e.g. `release/MYACC-12345` -> `[MYACC-12345] `).
 - Formatting hooks for SQL and Kotlin, plus Go format-on-save for Go-related filetypes.
 - UI setup with theme switching, bufferline tabs, lualine statusline, and neoscroll.
+- The lualine statusline shows the current macOS keyboard layout via `im-select` as `KB: EN`, `KB: RU`, or a short fallback label.
 - Markdown preview auto-starts for markdown buffers.
 - Markdown image paste saves clipboard screenshots into an `assets/` directory beside the current file.
 - Markdown image preview shows linked images in a small Kitty graphics floating window.
@@ -64,6 +65,7 @@ Commands and toggles
 
 External tools and dependencies
 - ripgrep (`rg`) is used by Telescope for file search and grep.
+- macOS keyboard layout statusline indicator expects `im-select` in PATH.
 - macOS screenshot pasting in Markdown expects `pngpaste` for clipboard image extraction.
 - Image preview expects a terminal with Kitty graphics protocol support; Kitty is the primary supported terminal here. ImageMagick (`magick`) handles non-PNG image conversion.
 - LSP servers are started only from `lua/lsp-core.lua` via `vim.lsp.start`; Mason is used to install server binaries.
