@@ -34,6 +34,8 @@ Commit message template
 
 Git workflow
 - Neogit is the primary status UI (`<leader>gg` and `<leader>gG`) with Diffview and Telescope integrations enabled.
+- GitLab MR review uses `gitlab.nvim` on its stable `main` branch and the maintained Diffview+ fork. Use `<leader>gM` to choose/check out an MR, `<leader>gR` on an existing MR branch, and `<leader>gX` to close the review.
+- Authentication is read from `GITLAB_TOKEN`; `GITLAB_URL` is only needed for self-hosted GitLab. Tokens are not stored in this config repository.
 - Neogit keeps unmerged files inside `Unstaged changes` by design; to make this clearer, conflict labels are rendered as `CONFLICT` and highlighted with error colors.
 - Neogit mode labels are compact (`MOD`, `NEW`, `ADD`, etc.) with wider mode-column padding and neutral `NeogitFilePath` coloring to improve filename readability in long lists.
 - Diffview uses enhanced diff highlighting for colorized side-by-side review.
@@ -68,4 +70,5 @@ LSP setup
 - `gopls` hard-disables inlay hints (capability + outgoing request interception), and `textDocument/inlayHint` handler errors about missing package metadata are suppressed to avoid repeated noise in affected workspaces.
 - `gopls` completion matcher is set to `Fuzzy` for more tolerant symbol/method suggestions, with completion budget increased to `400ms`.
 - `nvim-cmp` keeps fuzzy and non-prefix matching enabled (closer to IDE-style completion behavior), with LSP source priority and larger item caps to keep method results visible.
+- Diagnostic navigation uses `[d` / `]d` for any diagnostic and `[e` / `]e` for errors only.
 - LSP definition peeking uses `<leader>lp` to show the first definition location in a floating preview without moving the original cursor; press `<CR>` inside the float to jump there.

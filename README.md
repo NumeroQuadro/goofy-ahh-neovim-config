@@ -21,7 +21,7 @@ Features
 - Completion is configured for fuzzy/non-prefix matching in nvim-cmp (IDE-like filtering/ranking); Go LSP (`gopls`) uses fuzzy matching with a larger completion budget for method/symbol suggestions.
 - Completion with nvim-cmp + LuaSnip, plus autopairs integration.
 - Search and navigation with Telescope and file_browser; Pounce for jump navigation.
-- Git integrations with gitsigns, Diffview, Neogit, and git-conflict, plus Telescope git pickers.
+- Git integrations with gitsigns, Diffview+, Neogit, git-conflict, and GitLab merge-request review, plus Telescope git pickers.
 - Git commit message template auto-fill from branch issue keys (e.g. `release/MYACC-12345` -> `[MYACC-12345] `).
 - Formatting hooks for SQL and Kotlin, plus Go format-on-save for Go-related filetypes.
 - UI setup with theme switching, bufferline tabs, lualine statusline, and neoscroll.
@@ -44,8 +44,9 @@ Keymaps (custom)
 - Terminal: `<leader>ot` toggles a floating project terminal for the current tab and keeps the shell session alive while hidden.
 - Explorers: `<leader>fe` Telescope file browser at project root, `-` Telescope file browser at current file directory, `<leader>fE` netrw at project root, `<leader>-` netrw at current directory, `<leader>le` netrw left sidebar.
 - Diagnostics: `<leader>d` all, `<leader>de` errors, `<leader>dw` warnings, `<leader>df` current file, `<leader>e` float or current-file list.
-- LSP: `gd` definition, `<leader>lp` peek definition in a floating preview, `gT` type definition, `gi` implementation, `gr` references, `<C-g>d` definition in new tab, `<C-g>i` implementation in new tab, `<C-g>r` references in new tab, `K` hover, `<leader>rn` rename, `<leader>ca` code action, `[d` and `]d` prev and next diagnostic, `<C-k>` signature help in insert mode.
+- LSP: `gd` definition, `<leader>lp` peek definition in a floating preview, `gT` type definition, `gi` implementation, `gr` references, `<C-g>d` definition in new tab, `<C-g>i` implementation in new tab, `<C-g>r` references in new tab, `K` hover, `<leader>rn` rename, `<leader>ca` code action, `[d` and `]d` prev and next diagnostic, `[e` and `]e` prev and next error only, `<C-k>` signature help in insert mode.
 - Git: `<leader>gg` Neogit status, `<leader>gG` Neogit status in vsplit, `<leader>gb` blame line, `<leader>hr` reset hunk, `<leader>gd` Diffview open, `<leader>gq` Diffview close, `<leader>gh` file history, `<leader>gH` repo history, `<leader>gc` git commits, `<leader>gC` buffer commits, `<leader>gs` git status.
+- GitLab MRs: `<leader>gM` choose and check out an MR, `<leader>gR` review the MR for the current branch, `<leader>gX` close the review. Inside GitLab windows, use `g?` for context-specific help.
 - Conflicts: `]x` and `[x` next and previous conflict, `<leader>cm` open a picker menu for chunk resolution, `<leader>co` choose ours, `<leader>ct` choose theirs, `<leader>cb` choose both, `<leader>c0` choose none, `<leader>cq` list conflicts in quickfix, `<leader>cv` open merge diff view (auto-hides file panel for width), `<leader>cV` close merge diff view. Diffview merge mode defaults to `diff3_mixed`: top `OURS|THEIRS` references with a bottom full-width editable `LOCAL` pane. In Diffview use `<leader>b` to toggle file panel and `g<C-x>` to cycle layouts (including single-pane `diff1_plain`). Conflict sections use green (incoming) and red (current) backgrounds.
 - Neogit status view labels unmerged file rows as `CONFLICT` with strong error highlighting to separate them from generic unstaged entries.
 - Neogit status rows use compact mode tags (`MOD`, `NEW`, `ADD`, etc.) and neutral file-path highlighting so status labels and filenames are visually separated.
@@ -72,6 +73,7 @@ External tools and dependencies
 - SQL formatting expects a `sql_formatter` binary.
 - Kotlin formatting expects `ktlint`.
 - Go buffers use tab indentation via filetype-local options (`noexpandtab`, width 4).
+- GitLab MR review requires Go 1.25.1 or newer and a `GITLAB_TOKEN`; set `GITLAB_URL` as well only for self-hosted GitLab.
 - Go `.go` buffers run `organizeImports` before formatting on write (`:w`, `:wq`, UI save), so missing imports like `time` are added automatically when `gopls` is attached.
 - Go formatting runs on write (`:w`, `:wq`, UI save) for `go`, `gomod`, `gowork`, `gosum`, and `gotmpl`, preferring LSP and falling back to conform when available (`goimports`/`gofmt` for `.go` when installed).
 - Go inlay hints are hard-disabled for `gopls` (capability + request path), and noisy `InlayHint` metadata request errors are suppressed in LSP handlers.

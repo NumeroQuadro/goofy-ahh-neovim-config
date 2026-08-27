@@ -1,5 +1,5 @@
 return {
-    "sindrets/diffview.nvim",
+    "dlyongemallo/diffview-plus.nvim",
     dependencies = {
         "nvim-lua/plenary.nvim",
         "nvim-tree/nvim-web-devicons",
@@ -16,7 +16,7 @@ return {
             if vim.fn.exists(":DiffviewOpen") == 2 then return true end
             local ok = pcall(require, "lazy")
             if ok then
-                pcall(require("lazy").load, { plugins = { "diffview.nvim" } })
+                pcall(require("lazy").load, { plugins = { "diffview-plus.nvim" } })
             end
             return true
         end
